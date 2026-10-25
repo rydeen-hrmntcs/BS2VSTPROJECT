@@ -73,6 +73,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   On 20 October with host MIDI From = No Input, CC122=0 and 127 both left
   the Local menu showing On. No audible check was available; reception remains
   unverified, and the unchanged On display is not proof of an On command.
+  On 25 October, manual Off silenced the hardware keyboard through headphones;
+  channel-1 CC122=127 did not restore sound. Manual On restored it. The synth
+  channel was not freshly checked; no reliable remote On mapping is established.
 - [ ] **Sequence slots and contents:** verify selection in Play/Record,
   backup/restoration, notes/rests/ties and persistence before attempting step
   editing. Manual headphone checks on 25 October confirmed plugin selection

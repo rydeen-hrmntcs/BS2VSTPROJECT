@@ -51,3 +51,16 @@ when its BS2 track used MIDI From = No Input. The restricted-adjustment symptom
 strongly implicates track MIDI echo rather than a proven standalone hardware
 fault. Outgoing/incoming Tune encoding asymmetry makes such an echo hazardous;
 no negative receive mapping has been established.
+
+
+## Isolated manual check — 25 October 2026
+
+The user's Ableton screenshot showed the BSII track MIDI From = No Input and
+an unrelated MIDI track with MIDI To = No Output. Starting Tune was reported 0.
+The user confirmed normal physical 0 → -1 → 0 → +1 → 0 adjustment and return
+to zero. No diagnostic MIDI was sent and no frequency measurement was made.
+This adds a current normal manual-behavior check, not negative receive support.
+A fresh bounded search of Novation documentation and review of the official
+appendix found no documented signed Global Tune receive encoding. Further
+transmission remains deferred pending reliable protocol evidence or manufacturer
+clarification; do not repeat earlier failed candidates as a new test.

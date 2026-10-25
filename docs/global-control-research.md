@@ -411,3 +411,22 @@ may not be sufficient evidence of the functional receive behavior. No plugin
 Local Control parameter was added. Further acceptance requires a direct audible
 check with host echo blocked, or a documented reliable query/receive path.
 The final displayed setting was On; the temporary sender was removed.
+
+
+## Audible Local Control check — 25 October 2026
+
+The current Ableton screenshot showed BSII track MIDI From = No Input and
+track 2 MIDI To = No Output. Playback was requested stopped and Arp Off. The
+user heard a hardware key through headphones, then manually selected Local Off
+and confirmed that key produced no sound. A temporary scoped CoreMIDI sender
+sent exactly channel-1 `B0 7A 7F` (CC122=127) to the single Bass Station
+II destination. The user reported no sound returned. Manually selecting Local
+On restored audible keyboard sound. Final Local On recovery is user-confirmed.
+
+This adds a functional negative result for the standard Local On message,
+beyond the earlier display-only observations. It does not prove absence of all
+remote Local Control routes; actual synth channel was not freshly confirmed in
+this check, although the displayed External Instrument route was channel 1.
+No Tune, patch, save or tuning-table command was sent. The temporary probe was
+removed automatically. Keep Local Control unimplemented pending reliable
+bidirectional receive evidence or manufacturer clarification.
