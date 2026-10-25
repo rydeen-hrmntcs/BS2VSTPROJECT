@@ -109,7 +109,8 @@ from the old chat. Verify the current checkout and validation status first.
    notices/signatures and Apple AU validation passed. The user confirmed graph
    updates after cents edits, Undo and Redo, plus keyboard-to-table selection in
    Ableton. Octave navigation is built and native-tested (zero failures); staged
-   signatures/notices verified. Awaiting Live exit for installation.
+   and installed after confirmed Live exit. Installed signatures/notices and AU
+   validation passed; manual octave-button acceptance is next.
    Hardware tuning transfer is deferred until audio-interface/tuner setup is
    available; no tuning data has been sent. See
    microtune-editor.md. Sequence slot 1 was authorized for replacement; all four

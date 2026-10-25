@@ -179,7 +179,11 @@ including octave moves preserving note class, both disabled boundaries, final
 partial-octave clamping and unchanged document revision. The updated render was
 inspected. Evidence: `validation-results/tuning-octaves/native-test.log` and
 `tuning-visual.png`. Staged licence notices and strict local signatures passed.
-Installation and hosted octave-button acceptance are pending.
+AU/VST3 installation completed after confirming Live had quit. Previous bundles
+are preserved under `validation-results/tuning-octaves/installed-before/`.
+Installed strict signatures, licence notices and Apple AU validation passed;
+see `installation.txt` and `auval.log` in that report directory. Hosted
+octave-button acceptance is next.
 
 Hardware tuning transfer was deferred at the user's request until an external
 audio interface is available for tuner measurement. No tuning data was sent.
