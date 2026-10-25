@@ -156,3 +156,11 @@ validation (`auval.log`). Finder metadata added to the original staged bundle
 was detected before replacement; temporary staging with that metadata removed
 passed verification. Manual hosted visual acceptance is next. Public release
 assets are unchanged.
+
+
+Manual Ableton visual acceptance — 25 October 2026: on the installed build,
+the user confirmed that changing a note's cents offset updated the graph, and
+that Undo and Redo both updated it correctly. Manual graph/keyboard selection,
+import-driven visual refresh and hosted reopen checks were not newly verified;
+related native coverage is recorded above. No hardware tuning transfer was
+performed.

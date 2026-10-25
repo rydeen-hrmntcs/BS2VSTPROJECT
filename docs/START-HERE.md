@@ -106,8 +106,8 @@ from the old chat. Verify the current checkout and validation status first.
 3. The MicroTune keyboard/cents visualization is implemented in source; targeted
    native interaction/render checks passed with zero failures. AU/VST3 built;
    installed after Live exit, with prior bundles backed up. Installed licence
-   notices/signatures and Apple AU validation passed; manual hosted acceptance
-   is next. See
+   notices/signatures and Apple AU validation passed. The user confirmed graph
+   updates after cents edits, Undo and Redo in Ableton. See
    microtune-editor.md. Sequence slot 1 was authorized for replacement; all four
    Play selections worked. External MIDI recording failed to advance steps in
    this setup (Sync Off, IN routing); paused pending stronger evidence. The
