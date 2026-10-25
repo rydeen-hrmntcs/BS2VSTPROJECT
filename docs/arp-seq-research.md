@@ -183,6 +183,19 @@ For LFO 2, requested setup was Sync / 1/4 / Triangle with LFO 2 filter depth
 raised, Cutoff near the middle and a sustained hardware note, Arp Off. The user
 heard repeated filter movement and confirmed it slowed to roughly half speed
 and returned as Ableton changed 120 → 60 → 120 BPM. This is an audible relative
-rate check, not a measured 1/4-period/phase/jitter test. LFO 1, other divisions,
+rate check, not a measured 1/4-period/phase/jitter test. Other divisions,
 DIN, reconnection and independent clock-loss/internal-knob recovery remain
 separate checks. No plugin clock generator or firmware control was added.
+
+
+### Synced LFO 1 acceptance — 26 October 2026
+
+Requested setup: LFO 1 Sync / 1/4 / Triangle, Osc 1 LFO 1 pitch depth slightly
+above its neutral editor value 128, Arp Off and a sustained hardware key.
+The user heard pitch modulation at Ableton 120 BPM and confirmed it slowed when
+changing to 60 BPM during playback. After Stop, the modulation remained at the
+last received rate even when Ableton's tempo was changed while stopped.
+This is a user-reported audible relative-rate check, not a measured frequency,
+phase or jitter result. Basic audible clock following is now confirmed for arp,
+LFO 1 and LFO 2 in this Ableton setup. Other divisions, DIN and disconnect/recovery
+remain unverified. Final instruction: release the key and stop playback.

@@ -133,7 +133,9 @@ Ableton Output Sync (Song), Input Sync Off, audio engine enabled: hardware tempo
 and audible arp followed 120 → 60 → 120 BPM. Arp continued at roughly the last
 tempo on Stop and followed 90 BPM after restart. LFO 2 Sync / 1/4 filter
 modulation also followed 120 → 60 → 120 by ear. No plugin clock generator was
-added; exact phase/timing, LFO 1, other divisions, DIN and recovery remain open.
+added. LFO 1 Sync / 1/4 pitch modulation also slowed at 60 BPM; it retained
+the last received rate after Stop despite changing Ableton tempo while stopped.
+Exact phase/timing, other divisions, DIN and recovery remain open.
 See arp-seq-research.md. The initial apparent failure was resolved by enabling
 Ableton's audio engine; keep the BSII track MIDI From = No Input.
 

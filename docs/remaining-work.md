@@ -94,7 +94,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   drove the BSII hardware tempo and audible arp at 120 → 60 → 120 BPM.
   Arp continued at roughly the last tempo on Stop and followed 90 BPM on
   restart. Synced LFO 2 at 1/4 audibly followed 120 → 60 → 120 BPM through
-  filter modulation. Exact timing/phase, LFO 1, other divisions, clock-loss
+  filter modulation. LFO 1 at 1/4 also slowed at 60 BPM and retained its last
+  received rate after Stop despite host tempo changes while stopped.
+  Exact timing/phase, other divisions, clock-loss
   recovery and DIN remain unverified.
   Existing LFO sync-division controls do not implement a clock generator.
 - [ ] **Arp MIDI routing:** investigate the hardware Function + Latch toggle
