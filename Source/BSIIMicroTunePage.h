@@ -15,6 +15,7 @@ public:
 
 private:
     class CentsCell;
+    class TuningView;
     int getNumRows() override { return 128; }
     void paintRowBackground (juce::Graphics&, int, int, int, bool) override;
     void paintCell (juce::Graphics&, int, int, int, int, bool) override;
@@ -45,6 +46,7 @@ private:
     juce::TextEditor bulkCents;
     juce::Label selectionHint;
     juce::TableListBox table { "MicroTune notes", this };
+    std::unique_ptr<TuningView> tuningView;
     std::unique_ptr<juce::FileChooser> chooser;
     juce::Component::SafePointer<juce::DialogWindow> importDialog;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MicroTunePage)

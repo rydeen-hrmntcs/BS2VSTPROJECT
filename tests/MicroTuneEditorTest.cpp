@@ -128,6 +128,38 @@ int main (int argc, char** argv)
            "UI undo restores single note");
     check (click (*page,"Redo") && processor.getLocalTuningInfo().document.table.pitch (69) == 69.5,
            "UI redo reapplies note");
+    auto* visual = findComponent<juce::Component> (*page, [] (auto& c) { return c.getComponentID() == "tuningVisual"; });
+    check (visual != nullptr, "interactive tuning visualization available");
+    if (visual)
+    {
+        const auto revision = processor.getLocalTuningInfo().revision;
+        const auto choose = [&] (float x, float y, juce::ModifierKeys mods = {})
+        {
+            const juce::Point<float> point (x, y);
+            const auto now = juce::Time::getCurrentTime();
+            visual->mouseDown (juce::MouseEvent (juce::Desktop::getInstance().getMainMouseSource(),
+                point, mods, 1.0f, 0, 0, 0, 0, visual, visual, now, point, now, 1, false));
+        };
+        choose (58, 80);
+        check (table->isRowSelected (0) && table->getNumSelectedRows() == 1, "graph selects first MIDI key");
+        const auto whiteWidth = static_cast<float> (visual->getWidth() - 16) / 7.0f;
+        choose (8 + whiteWidth, 175);
+        check (table->isRowSelected (1), "black keyboard key takes precedence over white key");
+        visual->keyPressed (juce::KeyPress (juce::KeyPress::rightKey));
+        check (table->isRowSelected (2), "visual arrow navigation follows selected note");
+        choose (static_cast<float> (visual->getWidth() - 14), 80);
+        visual->keyPressed (juce::KeyPress (juce::KeyPress::rightKey));
+        check (table->isRowSelected (127), "graph and arrow navigation clamp at final MIDI key");
+        choose (static_cast<float> (visual->getWidth() - 16), 217);
+        check (table->isRowSelected (127), "last partial keyboard octave selects valid final white key");
+        table->selectRow (69);
+        visual->keyPressed (juce::KeyPress (juce::KeyPress::leftKey));
+        check (table->isRowSelected (68), "table selection updates visual keyboard focus");
+        table->selectRow (69);
+        check (picture (*visual, report.getChildFile ("tuning-visual.png")), "selected A4 plus 50 cents visual render");
+        check (processor.getLocalTuningInfo().revision == revision,
+               "visual selection never edits the tuning document");
+    }
     auto* bulk = findComponent<juce::TextEditor> (*page, [] (auto& e) { return e.getComponentID() == "bulkCents"; });
     check (bulk != nullptr, "bulk cents input available");
     if (bulk)

@@ -31,8 +31,147 @@ private:
     int row = 0;
 };
 
+// A local document view: selection changes use the existing table, never MIDI.
+class MicroTunePage::TuningView : public juce::Component
+{
+public:
+    explicit TuningView (MicroTunePage& p) : page (p)
+    {
+        setComponentID ("tuningVisual");
+        setTitle ("Tuning offsets and keyboard");
+        setDescription ("Click the graph or keyboard to select a note. Arrow keys move between notes.");
+        setWantsKeyboardFocus (true);
+    }
+
+    void selectionChanged()
+    {
+        const auto selected = page.table.getSelectedRows();
+        if (! selected.contains (focusKey) && ! selected.isEmpty())
+            focusKey = selected[0];
+        repaint();
+    }
+
+    void paint (juce::Graphics& g) override
+    {
+        g.fillAll (juce::Colour (0xff191d20));
+        const auto pitch = page.shown.document.table.pitch (focusKey).value_or (focusKey);
+        const auto note = juce::MidiMessage::getMidiNoteName (focusKey, true, true, 4);
+        g.setColour (juce::Colours::white);
+        g.setFont (14.0f);
+        g.drawText (note + "  |  Key " + juce::String (focusKey) + "  |  "
+                    + centsText (pitch, focusKey) + " cents  |  "
+                    + juce::String (440.0 * std::pow (2.0, (pitch - 69.0) / 12.0), 3) + " Hz",
+                    8, 0, getWidth() - 16, 24, juce::Justification::centredLeft);
+        const auto plot = graphBounds();
+        double limit = 50.0;
+        for (int key = 0; key < 128; ++key)
+            limit = juce::jmax (limit, std::abs (offset (key)));
+        const auto y = [&] (double cents) { return plot.getCentreY() - static_cast<float> (cents / limit) * plot.getHeight() * 0.46f; };
+        g.setFont (11.0f);
+        for (const auto value : { limit, 0.0, -limit })
+        {
+            g.setColour (juce::Colour (0xff41494e));
+            g.drawHorizontalLine (juce::roundToInt (y (value)), plot.getX(), plot.getRight());
+            g.setColour (juce::Colours::lightgrey);
+            g.drawText (juce::String (value, 0), 0, juce::roundToInt (y (value)) - 7, 52, 14,
+                        juce::Justification::centredRight);
+        }
+        juce::Path line;
+        for (int key = 0; key < 128; ++key)
+        {
+            const auto x = plot.getX() + plot.getWidth() * static_cast<float> (key) / 127.0f;
+            const auto cy = y (offset (key));
+            if (key == 0) line.startNewSubPath (x, cy); else line.lineTo (x, cy);
+        }
+        g.setColour (juce::Colour (0xff46a6c5));
+        g.strokePath (line, juce::PathStrokeType (1.5f));
+        for (int key = 0; key < 128; ++key)
+        {
+            const auto x = plot.getX() + plot.getWidth() * static_cast<float> (key) / 127.0f;
+            const auto selected = page.table.isRowSelected (key);
+            const auto diameter = selected ? 6.0f : 3.0f;
+            g.setColour (selected ? juce::Colours::orange : juce::Colour (0xff79c9de));
+            g.fillEllipse (x - diameter / 2, y (offset (key)) - diameter / 2, diameter, diameter);
+        }
+        g.setColour (juce::Colours::lightgrey);
+        g.drawText ("Cents from equal temperament  |  All 128 keys - click to select an octave",
+                    56, 145, getWidth() - 64, 18, juce::Justification::centredLeft);
+        const auto start = (focusKey / 12) * 12;
+        for (const auto black : { false, true })
+            for (int key = start; key < juce::jmin (128, start + 12); ++key)
+            {
+                if (isBlack (key) != black) continue;
+                const auto bounds = keyBounds (key);
+                const auto selected = page.table.isRowSelected (key);
+                g.setColour (selected ? juce::Colour (0xff277a96)
+                                     : black ? juce::Colour (0xff24282c) : juce::Colour (0xffe0e5e7));
+                g.fillRect (bounds);
+                g.setColour (juce::Colour (0xff101417));
+                g.drawRect (bounds);
+                g.setColour (selected || black ? juce::Colours::white : juce::Colours::black);
+                g.drawText (juce::MidiMessage::getMidiNoteName (key, true, true, 4), bounds.toNearestInt().withTrimmedTop (black ? 0 : 34),
+                            juce::Justification::centred);
+            }
+    }
+
+    void mouseDown (const juce::MouseEvent& event) override
+    {
+        int key = -1;
+        const auto plot = graphBounds();
+        if (event.position.y >= 24 && event.position.y < 164)
+            key = juce::jlimit (0, 127, juce::roundToInt ((event.position.x - plot.getX()) / plot.getWidth() * 127.0f));
+        else
+        {
+            const auto start = (focusKey / 12) * 12;
+            for (const auto black : { true, false })
+            {
+                for (int k = start; k < juce::jmin (128, start + 12); ++k)
+                    if (isBlack (k) == black && keyBounds (k).contains (event.position)) { key = k; break; }
+                if (key >= 0) break;
+            }
+        }
+        if (key >= 0) select (key, event.mods);
+        grabKeyboardFocus();
+    }
+
+    bool keyPressed (const juce::KeyPress& key) override
+    {
+        if (key.getKeyCode() != juce::KeyPress::leftKey && key.getKeyCode() != juce::KeyPress::rightKey) return false;
+        select (juce::jlimit (0, 127, focusKey + (key.getKeyCode() == juce::KeyPress::leftKey ? -1 : 1)), key.getModifiers());
+        return true;
+    }
+
+private:
+    double offset (int key) const { return (page.shown.document.table.pitch (key).value_or (key) - key) * 100.0; }
+    static bool isBlack (int key) { const auto pc = key % 12; return pc == 1 || pc == 3 || pc == 6 || pc == 8 || pc == 10; }
+    juce::Rectangle<float> graphBounds() const { return { 58.0f, 32.0f, static_cast<float> (juce::jmax (1, getWidth() - 72)), 104.0f }; }
+    juce::Rectangle<float> keyBounds (int key) const
+    {
+        constexpr int whitesBefore[] { 0, 1, 1, 2, 2, 3, 4, 4, 5, 5, 6, 6 };
+        const auto start = (focusKey / 12) * 12;
+        const auto count = start == 120 ? 5 : 7;
+        const auto width = static_cast<float> (juce::jmax (1, getWidth() - 16)) / count;
+        const auto x = 8.0f + whitesBefore[key % 12] * width;
+        return isBlack (key) ? juce::Rectangle<float> (x - width * 0.3f, 168.0f, width * 0.6f, 35.0f)
+                            : juce::Rectangle<float> (x, 168.0f, width, 58.0f);
+    }
+    void select (int key, juce::ModifierKeys mods)
+    {
+        const auto anchor = focusKey;
+        focusKey = key;
+        if (mods.isShiftDown()) page.table.selectRangeOfRows (juce::jmin (anchor, key), juce::jmax (anchor, key));
+        else page.table.selectRow (key, false, ! mods.isCommandDown() && ! mods.isCtrlDown());
+        page.table.scrollToEnsureRowIsOnscreen (key);
+        repaint();
+    }
+    MicroTunePage& page;
+    int focusKey = 60;
+};
+
 MicroTunePage::MicroTunePage (BSIIControlAudioProcessor& p) : processor (p)
 {
+    tuningView = std::make_unique<TuningView> (*this);
+    content.addAndMakeVisible (*tuningView);
     viewport.setViewedComponent (&content, false);
     viewport.setScrollBarsShown (true, false);
     addAndMakeVisible (viewport);
@@ -96,7 +235,7 @@ MicroTunePage::~MicroTunePage()
 void MicroTunePage::resized()
 {
     viewport.setBounds (getLocalBounds());
-    const auto height = juce::jmax (420, getHeight());
+    const auto height = juce::jmax (700, getHeight());
     const auto width = juce::jmax (1, getWidth() - (height > getHeight() ? viewport.getScrollBarThickness() : 0));
     content.setSize (width, height);
     auto area = content.getLocalBounds().reduced (12);
@@ -124,6 +263,8 @@ void MicroTunePage::resized()
     addButton.setBounds (bulk.removeFromLeft (100)); bulk.removeFromLeft (8);
     resetButton.setBounds (bulk.removeFromLeft (108));
     area.removeFromTop (8);
+    tuningView->setBounds (area.removeFromTop (234));
+    area.removeFromTop (8);
     status.setBounds (area.removeFromBottom (30));
     table.setBounds (area);
 }
@@ -145,6 +286,7 @@ void MicroTunePage::refresh()
     status.setColour (juce::Label::textColourId, juce::Colours::lightgreen);
     table.updateContent();
     table.repaint();
+    tuningView->repaint();
 }
 
 void MicroTunePage::paintRowBackground (juce::Graphics& g, int row, int width, int height, bool selected)
@@ -201,6 +343,7 @@ void MicroTunePage::editCents (int key, const juce::String& input)
 
 void MicroTunePage::selectedRowsChanged (int)
 {
+    if (tuningView) tuningView->selectionChanged();
     const auto count = table.getNumSelectedRows();
     selectionHint.setText (juce::String (count) + " selected - Shift/Command-click Key or Note to select.", juce::dontSendNotification);
     for (auto* button : { &setButton, &addButton, &resetButton }) button->setEnabled (count > 0);

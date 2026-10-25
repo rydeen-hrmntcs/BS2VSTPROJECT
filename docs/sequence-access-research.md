@@ -39,3 +39,75 @@ Existing empirical evidence is detailed in [Arp/Seq research](arp-seq-research.m
 5. Test one clock source over USB, then DIN separately: tempo following, held-note/latch playback, Start/Stop/Continue, reconnect and clock loss. Record what happens rather than assuming DAW transport starts the built-in sequencer.
 
 No sequence editing, slot management or sequence backup capability has been newly implemented or verified by this research.
+
+
+## Manual Play-mode slot acceptance — 25 October 2026
+
+With Ableton playback stopped and headphones connected to the BSII, the user
+chose a familiar preset and heard distinct existing sequences at physical
+Octaves/SEQ positions 1–4 with Direction on Play. Using the same held hardware
+key, plugin Octaves selections 2, 3 and 4 were confirmed to match those hardware
+patterns; selecting 1 in the plugin returned the original sequence. This
+establishes audible remote selection of all four slots in Play for this setup.
+The final instruction was to release the key and turn Arp On off.
+
+No Record-mode selection, note/rest/tie entry, sequence export, content backup
+or persistence test was performed. No sequence contents were intentionally
+written. Further recording tests require an explicitly disposable slot because
+a reliable sequence-content backup/restoration path remains unestablished.
+
+
+### Slot 1 recording and edit-buffer comparison
+
+The user explicitly authorized replacing sequence slot 1. Physical Record entry
+showed `rec`; recording C–E and then C–G produced the expected audible patterns.
+An initial comparison changed filterSlope, ampTrigger, modTrigger and arpOn, so
+it was not a controlled note-only comparison. A later identical pair preceded
+an ambiguous listening check and is retained only as preliminary evidence.
+
+After the user chose another preset and confirmed C–G playback, a fresh capture
+was taken with Play / slot 1 / Arp Off and keys released. The user recorded C–E
+in the same octave, returned to Play with Arp Off, and a second capture matched
+all 154 bytes exactly. Subsequent headphone playback confirmed C–E. Thus this
+ordinary edit-buffer response does not encode the changed sequence notes; it
+must not be advertised as a backup of sequence contents. This does not establish
+what other exports or stored-patch operations contain.
+
+Private evidence:
+- C–G: `midi-lab-results/20261025-133859-backup-e9baf9/baseline.syx`
+- C–E: `midi-lab-results/20261025-133923-backup-c7d889/baseline.syx`
+- Comparison: `midi-lab-results/20261025-133928-compare-89c520/comparison.json`
+
+Final instruction: release keys and turn Arp Off. Slot 1 now contains the test
+C–E sequence; original slot-1 contents were intentionally replaced with user
+permission. Slots 2–4 were not selected for recording. External MIDI note entry,
+remote rest/tie operations and sequence-content export remain unverified.
+
+
+### External MIDI note-entry test — 25 October 2026
+
+With slot 1 authorized for replacement, the user prepared a non-looping Ableton
+clip with separated C4/G4 notes routed through External Instrument to the BSII.
+In hardware Record mode with Arp Off, playback did not advance the display;
+returning to Play retained the previous sequence by listening. With Play / Arp
+Off, the user heard the clip notes through headphones, confirming basic note
+routing to the synth. Function + Latch subsequently displayed IN. A repeated
+Record-mode attempt in that setting, using a distinguishable three-note
+C4/G4/D4 clip, again left the display and sequence unchanged according to the
+user. No raw MIDI capture accompanied these attempts.
+
+External note recording was not established in this setup. This is not proof
+that all external recording routes are impossible. Do not implement a sequence
+uploader on the assumption that ordinary Note On messages record steps. Next
+work should review documented input prerequisites or find a supported transfer
+route before further probes. Final requested resting state: Play / Arp Off,
+Ableton stopped. Slots 2–4 were not authorized for recording.
+
+
+The user subsequently confirmed Ableton Output: Bass Station II Sync was already
+Off during these tests. A pasted AI-generated guide proposed disabling Sync and
+slowing playback; it is not protocol evidence. The official Novation guide
+states `rec` appears before the first entered note, then step 1. Novation's
+Function + Latch support article documents incoming arpeggiation, not explicitly
+sequence recording. External recording testing is paused pending stronger
+prerequisite/transport evidence; no blanket impossibility claim is made.

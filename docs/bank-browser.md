@@ -75,5 +75,26 @@ AU/VST3 bundles were installed with prior versions backed up under
 `validation-results/bank-browser/installed-before/`. Both MIT notices matched
 their source files, strict local ad-hoc signatures passed and Apple AU validation
 succeeded. Logs: auval.log and installation.txt in that report directory.
-Manual hosted bank browsing/loading acceptance is next; public preview downloads
-were not replaced. No physical hardware send was performed for installation.
+Public preview downloads were not replaced. No physical hardware send was
+performed for installation.
+
+
+## Ableton hardware acceptance — 25 October 2026
+
+The user opened the private Components bank and confirmed all 128 entries/names.
+After restarting Live, reopening the bank was necessary (intentional transient
+workspace). Entry 11 and the bank remained selected/visible across closing and
+reopening only the plugin editor. The user then explicitly clicked Load Selected
+to BSII with playback stopped. Fresh hardware readback matched the expected
+entry-11 temporary patch byte for byte. The pre-load temporary sound was restored
+and its readback verified. Stored presets and tuning-table contents were not
+written; no acoustic verification was performed.
+
+Private evidence (ignored):
+- Before load: `midi-lab-results/20261025-132413-backup-a4d338/baseline.syx`
+- Loaded readback: `midi-lab-results/20261025-132459-backup-b32a2f/baseline.syx`
+- Expected: `validation-results/bank-extraction-check/entry-11-temporary.syx`
+- Verified restoration: `midi-lab-results/20261025-132504-restore-2fae03/`
+
+Selection-only hardware silence was covered by native virtual-MIDI tests; this
+manual session did not take paired hardware captures around selection.

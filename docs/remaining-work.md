@@ -75,7 +75,16 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   unverified, and the unchanged On display is not proof of an On command.
 - [ ] **Sequence slots and contents:** verify selection in Play/Record,
   backup/restoration, notes/rests/ties and persistence before attempting step
-  editing. Random-access sequence read/write support is not established.
+  editing. Manual headphone checks on 25 October confirmed plugin selection
+  of all four existing sequences in Play, matching physical slot selection.
+  Slot 1 was authorized for replacement; physical two-note recording worked.
+  A controlled audible C–G to C–E change left the full 154-byte edit-buffer dump
+  identical, so ordinary patch backup does not preserve those sequence notes.
+  External note-entry attempts did not advance recording or change playback,
+  including with Function + Latch displaying IN; incoming clip notes were
+  separately audible. Remote recording and content backup remain unverified.
+  Random-access
+  sequence read/write support is not established.
 - [ ] **Tempo and clock:** decide scope for DAW clock/transport integration
   and verify routing. Internal tempo has no verified plugin control here.
   Existing LFO sync-division controls do not implement a clock generator.
@@ -103,8 +112,10 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   headers do not establish a stored-memory receive command.
   The [Banks page](bank-browser.md) now opens/browses a bank silently and loads
   one temporary patch explicitly. Model/native tests, AU/VST3 installation,
-  licence/signature checks and AU validation passed. Manual hosted browser
-  acceptance is next; see its guide. Current transfers target the
+  licence/signature checks and AU validation passed. Manual Ableton browsing,
+  editor-reopen selection retention and explicit entry-11 loading passed with
+  exact hardware readback and verified baseline restoration; see its guide.
+  Current transfers target the
   temporary sound; no new stored-preset overwrite workflow is implemented.
 - [ ] **AFX, last synth feature area:** overlay-bank selection, protection,
   per-note data editing, transfer and explicit save/clear operations. The manual

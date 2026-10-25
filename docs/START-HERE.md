@@ -95,19 +95,28 @@ from the old chat. Verify the current checkout and validation status first.
    The new PatchBankOffline model test and focused tool groups passed, as did
    the expanded native editor test. AU/VST3 were installed after confirmed Live
    exit; licence/signature checks and AU validation passed. See bank-browser.md.
-   Next: manual Ableton open/browse/explicit temporary-load acceptance.
+   Manual Ableton bank opening, editor-reopen selection retention and explicit
+   entry-11 temporary loading passed; hardware readback matched exactly and the
+   pre-load sound was restored with verified readback. See bank-browser.md.
    No stored-slot write is authorized/implemented;
    that next stage needs a fresh bank backup and a specified disposable target.
    The user confirmed the installed Ableton
    file chooser rejects the Components bank with the expected Not sent status.
    Stored-slot writing/restoration remain unverified; do not transmit the bank.
-3. The TUN v2 build/install increment and manual Ableton preview/apply/undo/redo
+3. The MicroTune keyboard/cents visualization is implemented in source; targeted
+   native interaction/render checks passed with zero failures. AU/VST3 built;
+   staged notices/signatures verified. Awaiting Live exit for installation. See
+   microtune-editor.md. Sequence slot 1 was authorized for replacement; all four
+   Play selections worked. External MIDI recording failed to advance steps in
+   this setup (Sync Off, IN routing); paused pending stronger evidence. The
+   ordinary patch dump stayed byte-identical across an audible note change.
+4. The TUN v2 build/install increment and manual Ableton preview/apply/undo/redo
    check are complete. Manual DAW reopen persistence is not newly verified.
    Choose the next unfinished feature from remaining-work; hardware tasks need
    the synth.
-4. With the synth available, follow the ordered hardware checks in remaining-work.
+5. With the synth available, follow the ordered hardware checks in remaining-work.
    Without it, continue only work that can be meaningfully validated offline.
-5. For later installations, confirm Ableton has actually quit; never quit it for
+6. For later installations, confirm Ableton has actually quit; never quit it for
    the user. Ask for save and Cmd+Q if needed, back up the bundles and verify them.
 
 ## Remaining feature areas

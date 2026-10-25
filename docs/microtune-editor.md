@@ -120,3 +120,34 @@ these new controls remains a manual acceptance check. Public preview assets rema
 unchanged.
 
 Numeric TUN details and supported subset: [TUN import](tun-import.md).
+
+
+## Tuning visualization — 25 October 2026
+
+The local MicroTune page now includes an all-128-key cents-offset graph and a
+keyboard showing the focused octave. Graph values are offsets from each MIDI
+key's equal-tempered pitch, with an automatic symmetric scale of at least
+±50 cents. These are calculated document values, not measured synth pitches.
+The focused note shows its name, MIDI key number, offset and calculated Hz.
+
+Click the graph to focus a note/octave; click a white or black keyboard key to
+select it in the existing table. Left/right arrows move one MIDI key; Shift
+extends a range and Command/Control-click adds to the selection. Table selection
+also updates the keyboard. Selections never audition notes or alter pitches.
+Edits, import application, Undo/Redo and document replacement refresh the graph
+through the existing document revision path. The outer page scrolls at smaller
+window sizes so the visualization, existing editing controls and table remain
+reachable. No host parameters or hardware-transfer behavior were added.
+
+
+Validation: AU/VST3 Release builds passed. The expanded native MicroTune editor
+program passed with zero failures, including graph endpoint selection, black-key
+hit precedence, arrow navigation, table-to-visual focus, last partial octave and
+selection leaving the document revision unchanged. Existing edit/import/history,
+file/state, MIDI-isolation, file-send gate and bank-browser checks passed in the
+same run. Graph/keyboard and default/minimum-size renders were inspected; the
+outer scrollbar exposes the keyboard and note list at smaller heights. Evidence:
+`validation-results/tuning-visual/native-test.log`, `tuning-visual.png` and
+`microtune-*.png`. Staged AU/VST3 licence notices and strict local signatures
+passed. Installation and manual hosted visual acceptance are pending; public
+release assets are unchanged.
