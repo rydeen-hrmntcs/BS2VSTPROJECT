@@ -107,7 +107,11 @@ from the old chat. Verify the current checkout and validation status first.
    native interaction/render checks passed with zero failures. AU/VST3 built;
    installed after Live exit, with prior bundles backed up. Installed licence
    notices/signatures and Apple AU validation passed. The user confirmed graph
-   updates after cents edits, Undo and Redo in Ableton. See
+   updates after cents edits, Undo and Redo, plus keyboard-to-table selection in
+   Ableton. Octave navigation is built and native-tested (zero failures); staged
+   signatures/notices verified. Awaiting Live exit for installation.
+   Hardware tuning transfer is deferred until audio-interface/tuner setup is
+   available; no tuning data has been sent. See
    microtune-editor.md. Sequence slot 1 was authorized for replacement; all four
    Play selections worked. External MIDI recording failed to advance steps in
    this setup (Sync Off, IN routing); paused pending stronger evidence. The

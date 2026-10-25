@@ -164,3 +164,22 @@ that Undo and Redo both updated it correctly. Manual graph/keyboard selection,
 import-driven visual refresh and hosted reopen checks were not newly verified;
 related native coverage is recorded above. No hardware tuning transfer was
 performed.
+
+
+### Octave navigation increment — 25 October 2026
+
+The user also confirmed clicking a visual keyboard key selects the matching
+note in Ableton. Added Previous octave / Next octave buttons and a visible
+note-name/MIDI-key range under the keyboard. Navigation selects the same note
+class 12 keys away, clamps to key 127 in the final partial octave and disables
+movement beyond either end. Existing table/graph selection still follows the
+focused note. This is local selection only, with no tuning edits or audition.
+AU/VST3 builds passed. The native editor test passed with zero failures,
+including octave moves preserving note class, both disabled boundaries, final
+partial-octave clamping and unchanged document revision. The updated render was
+inspected. Evidence: `validation-results/tuning-octaves/native-test.log` and
+`tuning-visual.png`. Staged licence notices and strict local signatures passed.
+Installation and hosted octave-button acceptance are pending.
+
+Hardware tuning transfer was deferred at the user's request until an external
+audio interface is available for tuner measurement. No tuning data was sent.

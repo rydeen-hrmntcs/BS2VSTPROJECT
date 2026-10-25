@@ -156,6 +156,14 @@ int main (int argc, char** argv)
         visual->keyPressed (juce::KeyPress (juce::KeyPress::leftKey));
         check (table->isRowSelected (68), "table selection updates visual keyboard focus");
         table->selectRow (69);
+        check (click (*visual, "Next octave >") && table->isRowSelected (81), "next octave preserves note class");
+        check (click (*visual, "< Previous octave") && table->isRowSelected (69), "previous octave returns to original note");
+        table->selectRow (0);
+        check (! click (*visual, "< Previous octave"), "previous octave disabled at MIDI lower bound");
+        table->selectRow (119);
+        check (click (*visual, "Next octave >") && table->isRowSelected (127), "next octave clamps partial final octave");
+        check (! click (*visual, "Next octave >"), "next octave disabled at MIDI upper bound");
+        table->selectRow (69);
         check (picture (*visual, report.getChildFile ("tuning-visual.png")), "selected A4 plus 50 cents visual render");
         check (processor.getLocalTuningInfo().revision == revision,
                "visual selection never edits the tuning document");

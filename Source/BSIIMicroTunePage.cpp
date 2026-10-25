@@ -41,6 +41,21 @@ public:
         setTitle ("Tuning offsets and keyboard");
         setDescription ("Click the graph or keyboard to select a note. Arrow keys move between notes.");
         setWantsKeyboardFocus (true);
+        addAndMakeVisible (previousOctave);
+        addAndMakeVisible (nextOctave);
+        addAndMakeVisible (octaveRange);
+        octaveRange.setJustificationType (juce::Justification::centred);
+        previousOctave.onClick = [this] { select (juce::jmax (0, focusKey - 12), {}); };
+        nextOctave.onClick = [this] { select (juce::jmin (127, focusKey + 12), {}); };
+        updateNavigation();
+    }
+
+    void resized() override
+    {
+        auto row = getLocalBounds().withTop (232).reduced (8, 0);
+        previousOctave.setBounds (row.removeFromLeft (128).withHeight (26));
+        nextOctave.setBounds (row.removeFromRight (128).withHeight (26));
+        octaveRange.setBounds (row.withHeight (26));
     }
 
     void selectionChanged()
@@ -48,6 +63,7 @@ public:
         const auto selected = page.table.getSelectedRows();
         if (! selected.contains (focusKey) && ! selected.isEmpty())
             focusKey = selected[0];
+        updateNavigation();
         repaint();
     }
 
@@ -142,6 +158,16 @@ public:
     }
 
 private:
+    void updateNavigation()
+    {
+        const auto start = (focusKey / 12) * 12;
+        const auto end = juce::jmin (127, start + 11);
+        previousOctave.setEnabled (start > 0);
+        nextOctave.setEnabled (start < 120);
+        octaveRange.setText (juce::MidiMessage::getMidiNoteName (start, true, true, 4)
+            + " - " + juce::MidiMessage::getMidiNoteName (end, true, true, 4)
+            + "  |  Keys " + juce::String (start) + "-" + juce::String (end), juce::dontSendNotification);
+    }
     double offset (int key) const { return (page.shown.document.table.pitch (key).value_or (key) - key) * 100.0; }
     static bool isBlack (int key) { const auto pc = key % 12; return pc == 1 || pc == 3 || pc == 6 || pc == 8 || pc == 10; }
     juce::Rectangle<float> graphBounds() const { return { 58.0f, 32.0f, static_cast<float> (juce::jmax (1, getWidth() - 72)), 104.0f }; }
@@ -162,10 +188,13 @@ private:
         if (mods.isShiftDown()) page.table.selectRangeOfRows (juce::jmin (anchor, key), juce::jmax (anchor, key));
         else page.table.selectRow (key, false, ! mods.isCommandDown() && ! mods.isCtrlDown());
         page.table.scrollToEnsureRowIsOnscreen (key);
+        updateNavigation();
         repaint();
     }
     MicroTunePage& page;
     int focusKey = 60;
+    juce::TextButton previousOctave { "< Previous octave" }, nextOctave { "Next octave >" };
+    juce::Label octaveRange;
 };
 
 MicroTunePage::MicroTunePage (BSIIControlAudioProcessor& p) : processor (p)
@@ -235,7 +264,7 @@ MicroTunePage::~MicroTunePage()
 void MicroTunePage::resized()
 {
     viewport.setBounds (getLocalBounds());
-    const auto height = juce::jmax (700, getHeight());
+    const auto height = juce::jmax (730, getHeight());
     const auto width = juce::jmax (1, getWidth() - (height > getHeight() ? viewport.getScrollBarThickness() : 0));
     content.setSize (width, height);
     auto area = content.getLocalBounds().reduced (12);
@@ -263,7 +292,7 @@ void MicroTunePage::resized()
     addButton.setBounds (bulk.removeFromLeft (100)); bulk.removeFromLeft (8);
     resetButton.setBounds (bulk.removeFromLeft (108));
     area.removeFromTop (8);
-    tuningView->setBounds (area.removeFromTop (234));
+    tuningView->setBounds (area.removeFromTop (264));
     area.removeFromTop (8);
     status.setBounds (area.removeFromBottom (30));
     table.setBounds (area);
