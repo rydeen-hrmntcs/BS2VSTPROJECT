@@ -90,6 +90,12 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   sequence read/write support is not established.
 - [ ] **Tempo and clock:** decide scope for DAW clock/transport integration
   and verify routing. Internal tempo has no verified plugin control here.
+  On 26 October, Ableton output Sync (Song) with its audio engine enabled
+  drove the BSII hardware tempo and audible arp at 120 → 60 → 120 BPM.
+  Arp continued at roughly the last tempo on Stop and followed 90 BPM on
+  restart. Synced LFO 2 at 1/4 audibly followed 120 → 60 → 120 BPM through
+  filter modulation. Exact timing/phase, LFO 1, other divisions, clock-loss
+  recovery and DIN remain unverified.
   Existing LFO sync-division controls do not implement a clock generator.
 - [ ] **Arp MIDI routing:** investigate the hardware Function + Latch toggle
   between external MIDI-to-Arp and Arp-to-MIDI; no verified remote command.

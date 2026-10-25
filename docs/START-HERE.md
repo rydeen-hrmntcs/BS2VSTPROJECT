@@ -127,6 +127,16 @@ from the old chat. Verify the current checkout and validation status first.
 6. For later installations, confirm Ableton has actually quit; never quit it for
    the user. Ask for save and Cmd+Q if needed, back up the bundles and verify them.
 
+## Clock acceptance — 26 October 2026
+
+Ableton Output Sync (Song), Input Sync Off, audio engine enabled: hardware tempo
+and audible arp followed 120 → 60 → 120 BPM. Arp continued at roughly the last
+tempo on Stop and followed 90 BPM after restart. LFO 2 Sync / 1/4 filter
+modulation also followed 120 → 60 → 120 by ear. No plugin clock generator was
+added; exact phase/timing, LFO 1, other divisions, DIN and recovery remain open.
+See arp-seq-research.md. The initial apparent failure was resolved by enabling
+Ableton's audio engine; keep the BSII track MIDI From = No Input.
+
 ## Remaining feature areas
 
 Global Tune receive encoding; Local Control; sequence slots/steps; tempo/clock

@@ -154,3 +154,35 @@ On the installed 83f7679 build, the user paused Live RX and confirmed that Get P
 The initial reported octave inconsistency was clarified by the user: the selector was correct; the diagnostic at the bottom displayed the internal zero-based choice index 0–3. Index 3 corresponds to displayed Octaves 4. This was not a confirmed octave-readback defect.
 
 These are specific manual SysEx readback checks in Ableton with live CC/NRPN application paused. They do not add sequence-note editing, verify every possible combination, or establish full sequence-slot content recall. Resume Live RX after testing for normal hardware following.
+
+
+## Ableton clock following — 26 October 2026
+
+User-confirmed headphone test with Ableton Output: Bass Station II Track and
+Sync enabled, Input Sync disabled, Clock Type Song and Sync Delay 0.00 ms.
+The BSII track MIDI From remained No Input. Playback was requested running,
+with hardware Direction Up, Latch Off and Arp On, holding a hardware key.
+
+Initial apparent clock failure (hardware Tempo freely adjustable to 240) was
+resolved when the user enabled Ableton's audio engine. They then reported the
+hardware tempo followed Ableton and confirmed the audible arp slowed/sped up
+with 120 → 60 → 120 BPM. The source of clock is Ableton's MIDI output; no plugin
+clock generator or direct Tempo mapping was added. This is a basic tempo-follow
+check, not a timing-jitter, phase, transport restart, LFO or DIN-port measurement.
+Start/Stop/Continue and clock-loss behavior remain to be tested separately.
+
+
+### Clock stop/restart and synced LFO 2
+
+Keeping the hardware key held, the user reported the arp continued at roughly
+the same tempo after Ableton Stop. Setting Ableton to 90 BPM and restarting
+playback changed the arp to that tempo. This establishes tempo following on
+restart for this setup, not exact phase/reset or MIDI Continue semantics.
+
+For LFO 2, requested setup was Sync / 1/4 / Triangle with LFO 2 filter depth
+raised, Cutoff near the middle and a sustained hardware note, Arp Off. The user
+heard repeated filter movement and confirmed it slowed to roughly half speed
+and returned as Ableton changed 120 → 60 → 120 BPM. This is an audible relative
+rate check, not a measured 1/4-period/phase/jitter test. LFO 1, other divisions,
+DIN, reconnection and independent clock-loss/internal-knob recovery remain
+separate checks. No plugin clock generator or firmware control was added.
