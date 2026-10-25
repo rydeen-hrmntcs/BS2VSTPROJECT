@@ -221,3 +221,15 @@ files matched the labelled readbacks exactly and passed the production send gate
 One entry-11 temporary hardware transfer/readback and fresh-baseline restoration
 also passed byte-for-byte. The evidence path and test scope are documented in
 that guide. Stored-memory restore commands remain unimplemented and untested.
+
+
+## Official stored route and slot1 hardware round trip — 26 October 2026
+
+[Stored-write research](stored-patch-write-research.md) identifies exact builders
+in Novation's Components client, including zero-based addresses, 144-byte payload
+at offsets9–152, stored replace type1 and stored request type65. User-approved
+entry11-to-slot1 replacement, full-bank verification and slot1 restoration passed;
+all128 original entries matched afterward. The pre-session temporary sound was
+also restored and verified. No general plugin stored-writer or full-bank restore
+was implemented. Power-cycle persistence, other write destinations and interrupted
+transfer recovery remain untested. Private bank/patch contents remain ignored.

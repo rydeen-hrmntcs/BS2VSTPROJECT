@@ -98,11 +98,17 @@ from the old chat. Verify the current checkout and validation status first.
    Manual Ableton bank opening, editor-reopen selection retention and explicit
    entry-11 temporary loading passed; hardware readback matched exactly and the
    pre-load sound was restored with verified readback. See bank-browser.md.
-   No stored-slot write is authorized/implemented;
-   that next stage needs a fresh bank backup and a specified disposable target.
+   On 26 October the user authorized temporary replacement/restoration of slot1.
+   Official Components source established exact stored write/request commands.
+   Fresh Components and all128 stored-request backups matched. Entry11-to-slot1
+   replacement changed only slot1; restoration returned the whole bank exactly.
+   The pre-session temporary sound was restored and verified. See
+   stored-patch-write-research.md. Next: separate explicit verified single-slot
+   writer UI/transport; no full-bank write is authorized or implemented.
    The user confirmed the installed Ableton
    file chooser rejects the Components bank with the expected Not sent status.
-   Stored-slot writing/restoration remain unverified; do not transmit the bank.
+   Other slot destinations, power-cycle persistence and interrupted recovery
+   remain untested. Do not transmit the whole bank.
 3. The MicroTune keyboard/cents visualization is implemented in source; targeted
    native interaction/render checks passed with zero failures. AU/VST3 built;
    installed after Live exit, with prior bundles backed up. Installed licence

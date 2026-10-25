@@ -119,8 +119,11 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   selected-preset/readback comparison passed at 0/1 and uniquely at 11/127.
   [Selected-entry conversion/export](bank-entry-extraction.md) passed offline
   exact-byte/production-gate tests and one temporary hardware load/readback plus
-  baseline restoration. Stored-write validation remains pending; outgoing
-  headers do not establish a stored-memory receive command.
+  baseline restoration. Official Components builders now establish the stored
+  receive/request commands; a user-approved slot1 write/readback/restoration
+  passed with complete all128 before/after verification on 26 October. See
+  stored-patch-write-research.md. Plugin integration, other destinations,
+  power-cycle persistence and interrupted-transfer recovery remain pending.
   The [Banks page](bank-browser.md) now opens/browses a bank silently and loads
   one temporary patch explicitly. Model/native tests, AU/VST3 installation,
   licence/signature checks and AU validation passed. Manual Ableton browsing,

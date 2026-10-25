@@ -116,3 +116,16 @@ subsequent entry-11 edit-buffer transfer matched its full readback, then the fre
 starting temporary patch was restored and matched independently. No stored slot
 was written. This advances temporary loading only; the stored-write authorization,
 addressing and fresh-bank verification prerequisites above remain in force.
+
+
+## First stored-slot round trip — 26 October 2026
+
+[Official Components source and scoped hardware evidence](stored-patch-write-research.md)
+now establish stored write type1 and stored request type65, both with zero-based
+destination. The user authorized slot1. Fresh Components and independent all128
+stored requests matched before writing. One entry11-to-slot1 write changed only
+slot1; one restoration returned the complete bank byte-identically. The original
+temporary sound was also restored with verified readback. This supersedes the
+unresolved receive-route status for that scoped test, not the remaining UI,
+other-destination, power-cycle or full-bank restoration work. Existing review
+flags remain read-only. No general stored-write plugin action exists yet.
