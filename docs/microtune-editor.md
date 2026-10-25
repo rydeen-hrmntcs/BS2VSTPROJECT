@@ -149,5 +149,10 @@ same run. Graph/keyboard and default/minimum-size renders were inspected; the
 outer scrollbar exposes the keyboard and note list at smaller heights. Evidence:
 `validation-results/tuning-visual/native-test.log`, `tuning-visual.png` and
 `microtune-*.png`. Staged AU/VST3 licence notices and strict local signatures
-passed. Installation and manual hosted visual acceptance are pending; public
-release assets are unchanged.
+passed. AU/VST3 installation completed after confirming Live had quit. Prior
+bundles are backed up under `validation-results/tuning-visual/installed-before/`;
+installed licence notices and strict signatures passed, as did Apple AU
+validation (`auval.log`). Finder metadata added to the original staged bundle
+was detected before replacement; temporary staging with that metadata removed
+passed verification. Manual hosted visual acceptance is next. Public release
+assets are unchanged.
