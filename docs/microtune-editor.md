@@ -183,7 +183,9 @@ AU/VST3 installation completed after confirming Live had quit. Previous bundles
 are preserved under `validation-results/tuning-octaves/installed-before/`.
 Installed strict signatures, licence notices and Apple AU validation passed;
 see `installation.txt` and `auval.log` in that report directory. Hosted
-octave-button acceptance is next.
+octave-button acceptance passed: the user confirmed Next octave and Previous
+octave update both keyboard labels and selected table note in Ableton
+(25 October 2026).
 
 Hardware tuning transfer was deferred at the user's request until an external
 audio interface is available for tuner measurement. No tuning data was sent.
