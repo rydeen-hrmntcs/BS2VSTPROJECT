@@ -160,6 +160,13 @@ AFX after the other synth areas; GUI redesign after features settle. Wider host,
 multiple-device, Intel/older macOS coverage and Developer ID/notarization remain
 separate work. See the detailed checklist for evidence and unresolved questions.
 
+## Later v2 direction
+
+The user agreed on 27 October to plan extended modulation as v2, after finishing
+v1 and the final GUI. See [v2 milestones](v2-roadmap.md). The ordered plan is
+traffic measurement, hardware profiles, scheduling, macros, software modulators,
+then note-triggered/deeper routing. No v2 implementation is requested yet.
+
 ## Decisions and working preferences
 
 - Preserve the 95 published host parameter indices (Paraphonic is index 94).

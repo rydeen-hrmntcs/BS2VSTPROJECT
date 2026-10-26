@@ -146,8 +146,10 @@ Performance notes, pitch bend, sustain and aftertouch remain part of DAW routing
 modulation-depth controls are implemented separately. Operating without Ableton
 External Instrument via dedicated note forwarding/audio integration is an optional
 future workflow, not a completed or agreed prerequisite for the editor.
-Extended software modulation is also deferred; see the user's ideas document
-before defining that scope.
+Extended software modulation is deferred to v2 after finishing v1 and its final
+GUI. The user agreed this order on 27 October; see [v2 milestones](v2-roadmap.md)
+for staged scope and acceptance gates. This is planning only, not an instruction
+to start v2 features during remaining v1 work.
 
 ## Next hardware session — short, ordered checks
 
