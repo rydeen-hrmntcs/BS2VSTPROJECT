@@ -104,7 +104,11 @@ from the old chat. Verify the current checkout and validation status first.
    replacement changed only slot1; restoration returned the whole bank exactly.
    The pre-session temporary sound was restored and verified. See
    stored-patch-write-research.md. Next: separate explicit verified single-slot
-   writer UI/transport; no full-bank write is authorized or implemented.
+   writer UI/transport is implemented, native-tested and installed. Focused model
+   tests, virtual-synth/editor checks and existing processor automation passed.
+   Installed AU/VST3 signatures/notices and AU validation passed after confirmed
+   Live exit. Next: manual hosted preparation/confirmation acceptance. See
+   stored-preset-writer.md. No full-bank write is authorized or implemented.
    The user confirmed the installed Ableton
    file chooser rejects the Components bank with the expected Not sent status.
    Other slot destinations, power-cycle persistence and interrupted recovery

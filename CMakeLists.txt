@@ -61,6 +61,7 @@ target_sources(BSIIControl PRIVATE
     Source/BSIIMicroTunePage.cpp
     Source/BSIIMicroTunePage.h
     Source/BSIIPatchBank.h
+    Source/BSIIStoredPatchWrite.h
     Source/BSIIBankPage.cpp
     Source/BSIIBankPage.h
     Source/BSIIScalaImportPanel.cpp
@@ -79,6 +80,7 @@ target_compile_definitions(BSIIControl PUBLIC
 
 target_link_libraries(BSIIControl PRIVATE
     BSIITunV2
+    juce::juce_cryptography
     juce::juce_audio_utils
     juce::juce_audio_devices
     juce::juce_audio_processors

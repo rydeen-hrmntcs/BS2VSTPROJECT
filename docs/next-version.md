@@ -3,6 +3,17 @@
 For current evidence and unfinished work, see [the 19 October checklist](remaining-work.md).
 Earlier entries below preserve implementation chronology.
 
+## Explicit stored-preset writer — 26 October 2026
+
+Banks now has a separate destination, Prepare and confirmed Write action. It
+backs up the current sound and all stored patches, rechecks files/destination,
+sends one preserved stored packet and verifies every slot independently. No
+automatic retry/replay/rollback or full-bank writer. Model/native virtual-synth
+and processor regressions passed; AU/VST3 are installed with strict signatures,
+licence checks and AU validation. Manual hosted acceptance is next. Prior scoped
+physical slot1 write/restoration passed, with the entire bank restored exactly.
+See [workflow and limits](stored-preset-writer.md).
+
 ## Bank browser — 25 October 2026
 
 Banks now opens complete exports, lists entry numbers/names and explicitly loads

@@ -6,7 +6,7 @@
 
 namespace bsii
 {
-// Observed export profile only; this type provides no stored-slot write command.
+// Strict modern bank profile. Stored packets require the separate explicit write workflow.
 class PatchBank
 {
 public:
@@ -57,6 +57,13 @@ public:
         auto* bytes = static_cast<juce::uint8*>(patch.getData());
         if (patch.getSize() == 154) std::fill(bytes+6,bytes+13,0);
         return patch;
+    }
+    juce::MemoryBlock storedPatch (int index, int destination) const
+    {
+        if (! juce::isPositiveAndBelow(index,128) || ! juce::isPositiveAndBelow(destination,128)) return {};
+        auto patch = entries[static_cast<size_t>(index)];
+        static_cast<juce::uint8*>(patch.getData())[8] = static_cast<juce::uint8>(destination);
+        return patch; // All 144 payload bytes at offsets 9..152 are preserved.
     }
     juce::String name (int index) const
     { return juce::isPositiveAndBelow(index,128) ? names[static_cast<size_t>(index)] : juce::String(); }

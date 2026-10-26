@@ -167,6 +167,7 @@ bool BSIIControlAudioProcessor::configureProjectRecall (RecallMode mode, int pro
 
 bool BSIIControlAudioProcessor::captureProjectSound()
 {
+    if(isStoredPatchBusy()) return false;
     const juce::ScopedLock lock (connectionLock);
     if (capturePending || ! midiOutput) { recallStatus = "Capture needs a connected MIDI output."; return false; }
     if (usesDirectHardwareSysEx() && ! connectHardwareSysExInput (midiOutput->getName()))
@@ -253,9 +254,116 @@ bool BSIIControlAudioProcessor::serviceProjectRecall()
     return false;
 }
 
+juce::String BSIIControlAudioProcessor::storedConnectionKey() const
+{
+    if(!midiOutput) return {};
+    const auto id=midiOutput->getIdentifier();
+    for(const auto& device : juce::MidiOutput::getAvailableDevices())
+        if(device.identifier==id) return id;
+    return {};
+}
+
+BSIIControlAudioProcessor::StoredWriteInfo BSIIControlAudioProcessor::getStoredWriteInfo() const
+{
+    const auto patch=bsii::decodePatchFields(storedWrite.originalPatch());
+    return {storedWrite.busy(),storedWrite.ready(),storedWrite.destination(),storedWrite.sourceIndex(),storedWrite.progress(),storedWrite.token(),
+            storedWrite.sourceName(),storedWriteError.isNotEmpty()?storedWriteError:storedWrite.status(),patch.patchName,juce::SHA256(storedWrite.plannedPatch()).toHexString(),storedBackupFolder};
+}
+
+bool BSIIControlAudioProcessor::prepareStoredPatchWrite(int destination, const juce::File& backupRoot)
+{
+    if(storedWrite.busy()) return false;
+    storedWriteError.clear();
+    {
+        const juce::ScopedLock lock(connectionLock);
+        if(capturePending || recallPending || recallSettling || pendingHardwareChannel.load()>0)
+        { storedWriteError="Finish capture, recall or channel setup before preparing a write."; return false; }
+    }
+    if(!localBank || storedConnectionKey().isEmpty() || !connectHardwareSysExInput(midiOutput->getName()))
+    { storedWriteError="Connect an unambiguous MIDI output and input, and open a bank first."; return false; }
+    const auto base=backupRoot==juce::File{} ? juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
+        .getChildFile("BSII Control/StoredPresetBackups") : backupRoot;
+    const auto folder=base.getChildFile(juce::Time::getCurrentTime().formatted("%Y%m%d-%H%M%S")+"-"+juce::Uuid().toString());
+    if(!folder.createDirectory()) { storedWriteError="Could not create a backup directory. Nothing sent."; return false; }
+    if(!storedWrite.begin(*localBank,localBankSelection,destination,storedConnectionKey(),juce::Time::getMillisecondCounterHiRes())) return false;
+    storedBackupFolder=folder;
+    cancelStoredWriteRequested.store(false);
+    return true;
+}
+
+bool BSIIControlAudioProcessor::confirmStoredPatchWrite(uint64_t token)
+{
+    if(cancelStoredWriteRequested.load() || !storedWrite.ready() || token!=storedWrite.token()) return false;
+    {
+        const juce::ScopedLock lock(connectionLock);
+        if(capturePending || recallPending || recallSettling || pendingHardwareChannel.load()>0) return false;
+    }
+    const auto sameFile=[&](const char* name,const juce::MemoryBlock& expected)
+    {
+        juce::MemoryBlock read;
+        return storedBackupFolder.getChildFile(name).loadFileAsData(read) && read==expected;
+    };
+    if(!sameFile("current-sound.syx",storedWrite.temporaryPatch())
+       || !sameFile("before-bank.syx",storedWrite.originalBank())
+       || !sameFile("original-slot.syx",storedWrite.originalPatch())
+       || !sameFile("planned-write.syx",storedWrite.plannedPatch())
+       || !sameFile("write-plan.json",storedPlanDocument))
+    { storedWrite.cancel("Backup files changed or disappeared. Prepare a fresh backup; nothing written."); return false; }
+    return storedWrite.confirm(juce::Time::getMillisecondCounterHiRes());
+}
+
+void BSIIControlAudioProcessor::cancelStoredPatchWrite()
+{ storedWrite.cancel("Stored-preset operation cancelled. Backup retained."); }
+
+bool BSIIControlAudioProcessor::serviceStoredPatchWrite()
+{
+    const bool wasBusy=storedWrite.busy();
+    if(cancelStoredWriteRequested.exchange(false)) storedWrite.cancel("DAW state changed. Prepare again; no automatic replay.");
+    if(!storedWrite.busy() && !storedWrite.ready()) return wasBusy;
+    const auto latest=getLatestSysEx();
+    const auto save=[&](const char* name,const juce::MemoryBlock& data)
+    {
+        const auto file=storedBackupFolder.getChildFile(name);
+        if(file.exists()) return false;
+        if(!file.replaceWithData(data.getData(),data.getSize())) return false;
+        juce::MemoryBlock check;
+        return file.loadFileAsData(check) && check==data;
+    };
+    storedWrite.tick(juce::Time::getMillisecondCounterHiRes(),storedConnectionKey(),latest.data,latest.serial,
+        [&](const juce::MemoryBlock& data)
+        {
+            if(!midiOutput || data.isEmpty()) return false;
+            midiOutput->sendMessageNow(juce::MidiMessage(data.getData(),static_cast<int>(data.getSize()),0.0));
+            return true; // Dispatch only. The transaction requires stored readback.
+        },
+        [&](const juce::MemoryBlock& bank,const juce::MemoryBlock& original,const juce::MemoryBlock& planned,const juce::MemoryBlock& temporary)
+        {
+            auto* object=new juce::DynamicObject();
+            juce::var metadata(object);
+            object->setProperty("format","BSII stored-preset write plan");
+            object->setProperty("version",1);
+            object->setProperty("sourceFile",storedWrite.sourceName());
+            object->setProperty("sourceEntry",storedWrite.sourceIndex());
+            object->setProperty("destination",storedWrite.destination());
+            object->setProperty("deviceIdentifier",storedConnectionKey());
+            object->setProperty("beforeBankSha256",juce::SHA256(bank).toHexString());
+            object->setProperty("originalSlotSha256",juce::SHA256(original).toHexString());
+            object->setProperty("plannedWriteSha256",juce::SHA256(planned).toHexString());
+            object->setProperty("currentSoundSha256",juce::SHA256(temporary).toHexString());
+            const auto text=juce::JSON::toString(metadata,true);
+            storedPlanDocument=juce::MemoryBlock(text.toRawUTF8(),static_cast<size_t>(text.getNumBytesAsUTF8()));
+            return save("current-sound.syx",temporary) && save("before-bank.syx",bank)
+                && save("original-slot.syx",original) && save("planned-write.syx",planned)
+                && save("write-plan.json",storedPlanDocument);
+        },
+        [&](const juce::MemoryBlock& bank){ return save("after-bank.syx",bank); });
+    return wasBusy || storedWrite.busy();
+}
+
 void BSIIControlAudioProcessor::timerCallback()
 {
     restoreHardwareConnection();
+    if (serviceStoredPatchWrite()) return;
     if (serviceHardwareChannelChange()) return;
     if (serviceProjectRecall()) return;
     const auto channel = hardwareMidiChannel.load();
@@ -548,6 +656,7 @@ void BSIIControlAudioProcessor::parseIncomingMidi (const juce::MidiBuffer& midiM
 
 bool BSIIControlAudioProcessor::requestHardwareMidiChannel (int target)
 {
+    if(isStoredPatchBusy()) return false;
     if (target < 1 || target > 16 || ! midiOutput || pendingHardwareChannel.load() > 0
         || capturePending || recallPending || recallSettling || target == hardwareMidiChannel.load())
         return false;
@@ -711,6 +820,7 @@ void BSIIControlAudioProcessor::getStateInformation (juce::MemoryBlock& destData
 
 void BSIIControlAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+    cancelStoredWriteRequested.store(true);
     auto xml = getXmlFromBinary (data, sizeInBytes);
     if (! xml) return;
     auto state = juce::ValueTree::fromXml (*xml);

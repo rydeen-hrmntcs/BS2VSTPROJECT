@@ -1,8 +1,9 @@
 # Patch-bank browser
 
 25 October 2026. The Banks tab opens a complete bank and explicitly loads one
-selected entry into the BSII temporary edit buffer. Stored-preset writing and
-full-bank restoration are not implemented.
+selected entry into the BSII temporary edit buffer. A separate explicit
+[stored-preset writer](stored-preset-writer.md) was added on 26 October; this
+guide describes temporary loading. Full-bank restoration is not implemented.
 
 ## Use
 

@@ -523,7 +523,7 @@ void BSIIControlAudioProcessorEditor::buildPages()
         if (!sendEditBufferPatch(patch)) return false;
         decodeSysExIntoEditor(patch,"selected bank entry",false);
         return true;
-    });
+    }, [this]{ return !patchRequestPending && !presetSync.pending() && !sysExCaptureArmed; });
     tabs.addTab ("Banks", juce::Colours::transparentBlack, bankPage.get(), false);
 }
 
@@ -653,19 +653,20 @@ void BSIIControlAudioProcessorEditor::timerCallback()
             juce::dontSendNotification);
     }
 
+    const bool storedBusy=processor.isStoredPatchBusy();
     const auto channelChange = processor.getHardwareChannelInfo();
-    channelBox.setEnabled (channelChange.pending < 0);
-    midiOutputBox.setEnabled (channelChange.pending < 0);
-    refreshButton.setEnabled (channelChange.pending < 0);
-    sendAllButton.setEnabled (channelChange.pending < 0);
+    channelBox.setEnabled (channelChange.pending < 0 && !storedBusy);
+    midiOutputBox.setEnabled (channelChange.pending < 0 && !storedBusy);
+    refreshButton.setEnabled (channelChange.pending < 0 && !storedBusy);
+    sendAllButton.setEnabled (channelChange.pending < 0 && !storedBusy);
     const auto recall = processor.getProjectRecallInfo();
     recallStatusLabel.setText (recall.status, juce::dontSendNotification);
     recallStatusLabel.setTooltip (recall.status);
     recallModeBox.setSelectedId (static_cast<int> (recall.mode) + 1, juce::dontSendNotification);
-    captureProjectButton.setEnabled (! recall.capturing && ! patchRequestPending && ! presetSync.pending());
-    recallModeBox.setEnabled (! recall.capturing);
-    presetBox.setEnabled (! recall.capturing);
-    getPatchButton.setEnabled (! recall.capturing);
+    captureProjectButton.setEnabled (!storedBusy && ! recall.capturing && ! patchRequestPending && ! presetSync.pending());
+    recallModeBox.setEnabled (!storedBusy && ! recall.capturing);
+    presetBox.setEnabled (!storedBusy && ! recall.capturing);
+    getPatchButton.setEnabled (!storedBusy && ! recall.capturing);
 
     const auto program = processor.consumeHardwareProgram();
     if (program >= 0) selectPreset (program, false);
@@ -795,6 +796,7 @@ void BSIIControlAudioProcessorEditor::forgetPreset (bool forgetProcessor)
 
 void BSIIControlAudioProcessorEditor::selectPreset (int program, bool sendToHardware)
 {
+    if(sendToHardware && processor.isStoredPatchBusy()) return;
     if (program < 0 || program > 127 || processor.getProjectRecallInfo().capturing) return;
     if (sendToHardware)
     {
@@ -814,6 +816,7 @@ void BSIIControlAudioProcessorEditor::selectPreset (int program, bool sendToHard
 
 void BSIIControlAudioProcessorEditor::requestPatchFromHardware()
 {
+    if(processor.isStoredPatchBusy()) { statusLabel.setText("Wait for the stored-preset operation to finish.",juce::dontSendNotification); return; }
     if (patchRequestPending || processor.getProjectRecallInfo().capturing) return;
     if (! reopenSelectedMidiOutput (true))
     {
@@ -850,6 +853,7 @@ int BSIIControlAudioProcessorEditor::currentParameterValue (const char* paramete
 
 void BSIIControlAudioProcessorEditor::sendAllStateToHardware()
 {
+    if(processor.isStoredPatchBusy()) return;
     if (midiOutput == nullptr)
     {
         statusLabel.setText ("Cannot send state: no MIDI output is open.", juce::dontSendNotification);
@@ -914,7 +918,7 @@ void BSIIControlAudioProcessorEditor::updateSysExDisplay()
     sysexLabel.setText ("SysEx RX: " + juce::String (size) + " bytes | " + preview,
                         juce::dontSendNotification);
 
-    if (patchRequestPending && latest.serial > patchRequestStartSerial)
+    if (patchRequestPending && latest.serial > patchRequestStartSerial && bsii::isRecallPatch(latest.data))
     {
         patchRequestPending = false;
         if (! presetSync.responseCurrent()) return;
@@ -986,6 +990,7 @@ bool BSIIControlAudioProcessorEditor::sendEditBufferFile (const juce::File& file
 
 bool BSIIControlAudioProcessorEditor::sendEditBufferPatch (const juce::MemoryBlock& data)
 {
+    if(processor.isStoredPatchBusy()) { statusLabel.setText("Wait for the stored-preset operation to finish.",juce::dontSendNotification); return false; }
     if (midiOutput == nullptr)
     {
         statusLabel.setText ("Cannot send patch: no MIDI output is open.", juce::dontSendNotification);

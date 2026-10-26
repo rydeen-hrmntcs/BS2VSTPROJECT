@@ -122,15 +122,19 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   baseline restoration. Official Components builders now establish the stored
   receive/request commands; a user-approved slot1 write/readback/restoration
   passed with complete all128 before/after verification on 26 October. See
-  stored-patch-write-research.md. Plugin integration, other destinations,
-  power-cycle persistence and interrupted-transfer recovery remain pending.
+  stored-patch-write-research.md. A [separate explicit writer](stored-preset-writer.md)
+  is now implemented, model/native-tested and installed with verified backups,
+  confirmation, fresh destination recheck and all-slot readback. Manual hosted
+  acceptance, other destinations, power-cycle persistence and interrupted-transfer
+  recovery remain pending.
   The [Banks page](bank-browser.md) now opens/browses a bank silently and loads
   one temporary patch explicitly. Model/native tests, AU/VST3 installation,
   licence/signature checks and AU validation passed. Manual Ableton browsing,
   editor-reopen selection retention and explicit entry-11 loading passed with
   exact hardware readback and verified baseline restoration; see its guide.
-  Current transfers target the
-  temporary sound; no new stored-preset overwrite workflow is implemented.
+  Load Selected still targets only the temporary sound. The separate stored-write
+  action requires Prepare, a saved backup and explicit confirmation; no full-bank
+  write workflow exists.
 - [ ] **AFX, last synth feature area:** overlay-bank selection, protection,
   per-note data editing, transfer and explicit save/clear operations. The manual
   documents dedicated messages; their presence does not verify our hardware

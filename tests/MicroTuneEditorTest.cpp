@@ -28,6 +28,27 @@ struct Capture : juce::MidiInputCallback
     bool received (const juce::MemoryBlock& data)
     { const juce::ScopedLock guard (lock); return last == data; }
 };
+struct StoredDevice : juce::MidiInputCallback
+{
+    juce::CriticalSection lock;
+    std::array<juce::MemoryBlock,128> patches;
+    juce::MemoryBlock current;
+    std::unique_ptr<juce::MidiOutput> replies;
+    std::atomic<int> writes {0}, unexpected {0};
+    void handleIncomingMidiMessage(juce::MidiInput*,const juce::MidiMessage& message) override
+    {
+        const juce::ScopedLock guard(lock);
+        const juce::MemoryBlock packet(message.getRawData(),static_cast<size_t>(message.getRawDataSize()));
+        const auto* b=static_cast<const juce::uint8*>(packet.getData());
+        juce::MemoryBlock response;
+        if(packet.getSize()==9 && b[7]==0x40) response=current;
+        else if(packet.getSize()==10 && b[7]==0x41 && b[8]<128) response=patches[b[8]];
+        else if(packet.getSize()==154 && b[8]<128 && bsii::StoredPatchWrite::isStoredReply(packet,b[8]))
+        { patches[b[8]]=packet; ++writes; }
+        else ++unexpected;
+        if(replies && !response.isEmpty()) replies->sendMessageNow(juce::MidiMessage(response.getData(),static_cast<int>(response.getSize()),0.0));
+    }
+};
 struct Listener : juce::AudioProcessorListener
 {
     int parameters = 0, localChanges = 0;
@@ -526,6 +547,85 @@ int main (int argc, char** argv)
         check(!fresh.getLocalBank(),"bank workspace is not silently embedded/replayed by DAW state");
         editor.reset();pump();editor.reset(processor.createEditor());pump();
         check(processor.getLocalBank()==saved && processor.getLocalBankSelection()==11 && capture.messages.load()==count+1,"editor reopen keeps workspace without resending");
+    }
+    // Actual processor-owned stored transaction, using only a private virtual BSII.
+    {
+        StoredDevice device;
+        const auto deviceName="BSII Stored Test "+juce::Uuid().toString();
+        device.replies=juce::MidiOutput::createNewDevice(deviceName);
+        auto requests=juce::MidiInput::createNewDevice(deviceName,&device);
+        check(device.replies && requests,"isolated stored-device ports created");
+        if(device.replies && requests)
+        {
+            juce::File::getCurrentWorkingDirectory().getChildFile("tests/state-fixtures/baseline.syx").loadFileAsData(device.current);
+            juce::MemoryBlock raw;
+            for(int i=0;i<128;++i)
+            {
+                auto packet=device.current;auto* b=static_cast<juce::uint8*>(packet.getData());
+                b[7]=1;b[8]=static_cast<juce::uint8>(i);b[20]=static_cast<juce::uint8>(i);
+                device.patches[static_cast<size_t>(i)]=packet;raw.append(packet.getData(),packet.getSize());
+            }
+            juce::String error;
+            auto bank=bsii::PatchBank::parse(raw,"virtual-device-bank.syx",error);
+            requests->start();
+            juce::AudioProcessor::setTypeOfNextNewPlugin(juce::AudioProcessor::wrapperType_VST3);
+            BSIIControlAudioProcessor stored;
+            juce::AudioProcessor::setTypeOfNextNewPlugin(juce::AudioProcessor::wrapperType_Undefined);
+            for(int n=0;n<20 && !stored.hardwareMidiOutput();++n)
+            {
+                for(const auto& port:juce::MidiOutput::getAvailableDevices())
+                    if(port.name==deviceName) stored.hardwareMidiOutput()=juce::MidiOutput::openDevice(port.identifier);
+                if(!stored.hardwareMidiOutput()) pump(50);
+            }
+            stored.setLocalBank(bank);stored.selectLocalBankEntry(11);stored.rememberHardwareProgram(23);
+            stored.connectHardwareSysExInput(deviceName);
+            auto bankEditor=std::unique_ptr<juce::AudioProcessorEditor>(stored.createEditor());bankEditor->setVisible(true);
+            pump(600); // Finish the editor's normal remembered-preset refresh first.
+            const auto parameters=stored.getParameters().copyState();
+            Listener localListener;stored.addListener(&localListener);
+            BankPage* bankPage=nullptr;
+            for(auto* child:bankEditor->getChildren()) if(auto* tabs=dynamic_cast<juce::TabbedComponent*>(child))
+            {
+                const auto tab=tabs->getTabNames().indexOf("Banks");
+                if(tab>=0){tabs->setCurrentTabIndex(tab);bankPage=dynamic_cast<BankPage*>(tabs->getTabContentComponent(tab));}
+            }
+            const auto wait=[&](const std::function<bool()>& done)
+            {
+                const auto deadline=juce::Time::getMillisecondCounterHiRes()+60000;
+                while(!done() && juce::Time::getMillisecondCounterHiRes()<deadline) pump(50);
+                return done();
+            };
+            check(bankPage && bankPage->prepareSelectedWrite(1,report.getChildFile("stored-backups")),"actual Banks page starts read-only backup");
+            pump(150);
+            check(!click(*bankEditor,"Get Patch from BSII") && !click(*bankEditor,"Send All → BSII"),"conflicting current-sound controls are disabled during stored operation");
+            check(wait([&]{return !stored.getStoredWriteInfo().busy;}),"stored backup finishes without editor polling ownership");
+            const auto info=stored.getStoredWriteInfo();
+            check(info.ready && device.writes.load()==0,"ready preview sends no stored writes");
+            juce::MemoryBlock saved;
+            check(info.backupFolder.getChildFile("before-bank.syx").loadFileAsData(saved) && saved==raw,"full bank backup saved exactly");
+            saved.reset();
+            check(info.backupFolder.getChildFile("current-sound.syx").loadFileAsData(saved) && saved==device.current,"temporary sound backup saved exactly");
+            pump(250);
+            check(info.backupFolder.getChildFile("write-plan.json").existsAsFile() && info.plannedHash.length()==64,"write plan includes exact payload fingerprint");
+            if(bankPage)check(picture(*bankPage,report.getChildFile("stored-write-preview.png")),"stored destination preview rendered");
+            check(!stored.confirmStoredPatchWrite(info.token+1) && device.writes.load()==0,"stale dialog token cannot authorize a write");
+            check(bankPage && bankPage->confirmPreparedWrite(info.token),"explicit confirmation starts processor transaction");
+            bankEditor.reset(); // Verification must complete even with the editor closed.
+            check(wait([&]{return !stored.getStoredWriteInfo().busy;}),"verification finishes with editor closed");
+            check(stored.getStoredWriteInfo().status.contains("verified.") && device.writes.load()==1 && device.unexpected.load()==0,"exactly one write verified through real virtual ports");
+            {
+                const juce::ScopedLock guard(device.lock);
+                check(device.patches[1]==bank->storedPatch(11,1) && device.patches[2]==bank->storedPatch(2,2),"virtual destination matches and neighbour unchanged");
+            }
+            check(stored.getKnownHardwareProgram()==23,"stored operation preserves current preset identity");
+            check(localListener.parameters==0,"stored operation sends no host automation gestures");
+            check(parameters.isEquivalentTo(stored.getParameters().copyState()),"stored replies never impersonate current patch parameters");
+            juce::MemoryBlock state;stored.getStateInformation(state);
+            const auto writes=device.writes.load();
+            stored.setStateInformation(state.getData(),static_cast<int>(state.getSize()));pump(300);
+            check(device.writes.load()==writes && !stored.getStoredWriteInfo().ready,"host state restore cannot replay a stored write");
+            stored.removeListener(&localListener);requests->stop();
+        }
     }
     processor.removeListener (&listener);
     editor.reset(); sink->stop();

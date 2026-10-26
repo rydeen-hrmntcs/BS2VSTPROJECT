@@ -6,6 +6,7 @@
 #include "BSIIMidi.h"
 #include "BSIITuningDocument.h"
 #include "BSIIPatchBank.h"
+#include "BSIIStoredPatchWrite.h"
 #include "BSIIHardwareSysExInput.h"
 
 class BSIIControlAudioProcessor : public juce::AudioProcessor,
@@ -85,6 +86,20 @@ public:
     void selectLocalBankEntry (int index)
     { if (localBank && juce::isPositiveAndBelow(index,128)) localBankSelection = index; }
 
+    struct StoredWriteInfo
+    {
+        bool busy=false, ready=false;
+        int destination=-1, sourceIndex=-1, progress=0;
+        uint64_t token=0;
+        juce::String source, status, originalName, plannedHash;
+        juce::File backupFolder;
+    };
+    StoredWriteInfo getStoredWriteInfo() const;
+    bool prepareStoredPatchWrite(int destination, const juce::File& backupRoot = {});
+    bool confirmStoredPatchWrite(uint64_t token);
+    void cancelStoredPatchWrite();
+    bool isStoredPatchBusy() const { return storedWrite.busy(); }
+
     // Reception/import/recall updates parameters without transmitting them.
     // Thread-local scopes leave concurrent automation on other threads enabled.
     class ScopedMidiSilence
@@ -154,6 +169,14 @@ private:
     void parseIncomingMidi (const juce::MidiBuffer&, bool acceptSysEx = true, bool directControls = false);
     void receiveSysEx (const juce::MidiMessage&);
     void publishNRPN (int channel, int nrpnMSB, int nrpnLSB, int value);
+
+    bool serviceStoredPatchWrite();
+    juce::String storedConnectionKey() const;
+    bsii::StoredPatchWrite storedWrite;
+    juce::File storedBackupFolder;
+    juce::String storedWriteError;
+    juce::MemoryBlock storedPlanDocument;
+    std::atomic<bool> cancelStoredWriteRequested { false };
 
     std::shared_ptr<const bsii::PatchBank> localBank;
     int localBankSelection = -1;
