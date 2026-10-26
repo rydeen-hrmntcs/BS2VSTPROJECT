@@ -160,6 +160,17 @@ AFX after the other synth areas; GUI redesign after features settle. Wider host,
 multiple-device, Intel/older macOS coverage and Developer ID/notarization remain
 separate work. See the detailed checklist for evidence and unresolved questions.
 
+## AFX work in progress — 27 October 2026
+
+See [AFX protocol and first capture](afx-protocol-research.md). Read-only active
+buffer capture/inspection tools are implemented; focused AfxOffline/MidiLabTools/
+ResearchTools passed3/3. User reported o0. Two25-record data collections matched
+exactly; name request54/key0 timed out. Names, saved-bank identity and restoration
+remain unverified. No banks/protection/overlays were changed or saved, and the
+ordinary patch was unchanged. Components screenshots provide a25-key/per-key
+side-panel reference, with Live Edit off. Next: local opaque AFX document/browser,
+then reviewed backup/restore before hardware editing. No plugin AFX page yet.
+
 ## Later v2 direction
 
 The user agreed on 27 October to plan extended modulation as v2, after finishing

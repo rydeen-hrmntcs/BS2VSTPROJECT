@@ -390,8 +390,40 @@ def main():
     extract.add_argument('export_index', type=int)
     extract.add_argument('output', type=Path)
     extract.add_argument('--json', action='store_true')
+    afx_inspect = commands.add_parser('inspect-afx', help='offline: inspect active AFX replies; never sends MIDI')
+    afx_inspect.add_argument('capture', type=Path)
+    afx_inspect.add_argument('--json', action='store_true')
+    afx_read = commands.add_parser('read-afx-active', help='read active AFX buffer only; no bank selection or writes')
+    afx_read.add_argument('--reported-bank', type=int, choices=range(9))
+    afx_read.add_argument('--data-only', action='store_true', help='explicitly skip optional name requests; names remain unavailable')
     args = parser.parse_args()
     if args.command is None: args = parser.parse_args(['record'])
+    if args.command in ('inspect-afx', 'read-afx-active'):
+        import afx
+        if args.command == 'inspect-afx':
+            report = afx.inspect_file(args.capture)
+            print(json.dumps(report, indent=2) if args.json else f"AFX data: {report['dataKeys']}/25; names: {report['nameKeys']}/25; complete: {report['complete']}. Read-only inspection; no write eligibility.")
+            if not report['complete']: raise SystemExit(1)
+            return
+        directory = run_dir('afx-active')
+        source = Path(__file__).with_name('AfxRead.swift')
+        binary = CACHE / 'AfxRead'
+        CACHE.mkdir(parents=True, exist_ok=True)
+        if not binary.exists() or binary.stat().st_mtime < source.stat().st_mtime:
+            execute(['swiftc', source, '-o', binary], CACHE / 'afx-read-build.log')
+        execute([binary, directory] + (['--data-only'] if args.data_only else []), directory / 'capture.log')
+        path = directory / 'active-buffer-replies.syx'
+        if path.stat().st_size:
+            report = afx.inspect_file(path)
+        else:
+            report = dict(complete=False, dataKeys=0, nameKeys=0, error='No matching AFX replies')
+        report.update(reportedBank=args.reported_bank, bankEvidence='user-reported, not queried', firmware=None)
+        (directory / 'inspection.json').write_text(json.dumps(report, indent=2)+'\n')
+        print(f"AFX data: {report['dataKeys']}/25; names: {report['nameKeys']}/25; complete: {report['complete']}. Capture: {directory}")
+        print('No bank selection, protection change, overlay import, clear or save sent.')
+        transport = json.loads((directory / 'transport.json').read_text())
+        if transport['stoppedEarly'] or report.get('issues') or not report.get('dataComplete', False): raise SystemExit(1)
+        return
     if args.command in ('inspect-sysex', 'review-bank', 'extract-bank-entry'):
         spec = importlib.util.spec_from_file_location('bsii_sysex_stream', Path(__file__).with_name('sysex_stream.py'))
         stream_tools = importlib.util.module_from_spec(spec)
