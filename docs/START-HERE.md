@@ -107,8 +107,11 @@ from the old chat. Verify the current checkout and validation status first.
    writer UI/transport is implemented, native-tested and installed. Focused model
    tests, virtual-synth/editor checks and existing processor automation passed.
    Installed AU/VST3 signatures/notices and AU validation passed after confirmed
-   Live exit. Next: manual hosted preparation/confirmation acceptance. See
-   stored-preset-writer.md. No full-bank write is authorized or implemented.
+   Live exit. Manual Ableton entry11-to-slot1 writing and entry1-to-slot1
+   restoration passed on 27 October. Saved full-bank verification replies show
+   only slot1 changed per operation and the final bank matches the original in
+   all19,712 bytes. See stored-preset-writer.md. No full-bank write is authorized
+   or implemented; other destinations/power-cycle/interruption remain untested.
    The user confirmed the installed Ableton
    file chooser rejects the Components bank with the expected Not sent status.
    Other slot destinations, power-cycle persistence and interrupted recovery

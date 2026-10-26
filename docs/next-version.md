@@ -10,8 +10,9 @@ backs up the current sound and all stored patches, rechecks files/destination,
 sends one preserved stored packet and verifies every slot independently. No
 automatic retry/replay/rollback or full-bank writer. Model/native virtual-synth
 and processor regressions passed; AU/VST3 are installed with strict signatures,
-licence checks and AU validation. Manual hosted acceptance is next. Prior scoped
-physical slot1 write/restoration passed, with the entire bank restored exactly.
+licence checks and AU validation. Manual Ableton slot1 writing/restoration passed
+on 27 October, with the entire bank restored exactly. Prior scoped physical
+slot1 write/restoration also passed.
 See [workflow and limits](stored-preset-writer.md).
 
 ## Bank browser — 25 October 2026

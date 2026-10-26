@@ -124,9 +124,10 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   passed with complete all128 before/after verification on 26 October. See
   stored-patch-write-research.md. A [separate explicit writer](stored-preset-writer.md)
   is now implemented, model/native-tested and installed with verified backups,
-  confirmation, fresh destination recheck and all-slot readback. Manual hosted
-  acceptance, other destinations, power-cycle persistence and interrupted-transfer
-  recovery remain pending.
+  confirmation, fresh destination recheck and all-slot readback. Manual Ableton
+  slot1 write/restoration passed on 27 October; the final complete verification
+  bank matches the original exactly. Other destinations, power-cycle persistence
+  and interrupted-transfer recovery remain pending.
   The [Banks page](bank-browser.md) now opens/browses a bank silently and loads
   one temporary patch explicitly. Model/native tests, AU/VST3 installation,
   licence/signature checks and AU validation passed. Manual Ableton browsing,

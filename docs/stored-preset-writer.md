@@ -106,4 +106,35 @@ Ableton was process-confirmed closed before installation. Prior AU/VST3 are
 preserved under `installed-before/`. Staged and installed strict local ad-hoc
 signatures and both bundled MIT licence notices passed; Apple AU validation
 passed (`auval.log`, `installation.txt`). Public release assets were not replaced.
-Manual hosted preparation/confirmation/verification acceptance remains next.
+Manual hosted preparation/confirmation/verification and restoration passed on
+27 October 2026, as detailed below.
+
+
+## Manual Ableton acceptance — 27 October 2026
+
+The user opened BSII-bank-before.syx, selected entry11 and destination1, prepared
+a fresh backup and explicitly confirmed the stored write. The screenshot reported
+Stored preset1 verified, other127 unchanged. They then opened the first
+operation's before-bank.syx to restore the destination. An intermediate entry0
+preview was corrected to entry1 and prepared again before the confirmed
+restoration. The user confirmed the final verified status.
+
+The saved complete verification files independently support both outcomes:
+entry11-to-slot1 changed exactly slot1 and matched its planned packet; the final
+entry1-to-slot1 restoration changed exactly slot1 and returned all19,712 bank
+bytes to the pre-test reference. Final SHA256:
+`675ee6c6bced2facd0b880a58b1bbe8bdfd2587237d774d78d5c61dc64a8a232`.
+This compares the plugin's recorded hardware replies; no additional live query
+or power-cycle test was performed. Other write destinations remain untested.
+
+Private evidence: `validation-results/stored-patch-ui-accepted/hosted-acceptance-20261027.json`
+records backup-directory paths, source/destination, changed indices and hashes.
+Original account/download and patch files remain private. Components Save keeps
+the bank in the account; Download creates the local .syx file.
+
+Finder navigation: Library is hidden by default. In Open Bank, Command-Shift-G
+with `~/Library/BSII Control/StoredPresetBackups/` exposes the backup directories;
+Show backup opens the selected operation's directory directly. Choose the
+original write's before-bank.syx, not a later preparation's backup, when restoring
+pre-test contents. In particular the newest folder is not necessarily the
+original-state backup once another preparation has been made.
