@@ -69,3 +69,14 @@ check at `~/Downloads/BSII-AFX-active-buffer-2026-10-27.syx`. It has25 records,
 2650 bytes and no names. Captured with o0 reported, it is not labelled a verified
 saved bank and is not a restoration claim. No physical MIDI was sent by the
 browser or native tests.
+
+
+## Manual Ableton selection acceptance — 27 October 2026
+
+The user opened Downloads/BSII-AFX-active-buffer-2026-10-27.syx in the installed
+AFX page. Screenshot showed Data25/25, Names0/25, D2 highlighted with matching
+Key3/wire index2 details and preserved106-byte record. The user then confirmed
+black-key and C4 selection also updated correctly. This accepts hosted local
+opening/selection/detail display, not hardware editing or saved-bank identity.
+Manual exact-copy saving and Set reopen were not newly checked; native coverage
+for copying/editor recreation is recorded above. No AFX hardware writes occurred.

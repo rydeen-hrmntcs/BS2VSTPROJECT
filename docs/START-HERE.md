@@ -171,8 +171,10 @@ ordinary patch was unchanged. Components screenshots provide a25-key/per-key
 side-panel reference, with Live Edit off. The local opaque [AFX browser](afx-local-browser.md) is implemented and installed.
 Focused AfxOffline/PatchBankOffline and native editor checks passed (zero failures),
 including all25 local selections and exact-byte copying without MIDI. Installed
-signatures/notices and AU validation passed after confirmed Live exit. Next:
-manual Ableton AFX open/select/copy check using Downloads/BSII-AFX-active-buffer-2026-10-27.syx.
+signatures/notices and AU validation passed after confirmed Live exit. Manual
+Ableton open/selection passed: D2 details matched and black keys/C4 followed.
+Manual copy saving remains separate. Capture file is
+Downloads/BSII-AFX-active-buffer-2026-10-27.syx.
 No hardware-send/edit controls are added. Reviewed backup/restore remains required before hardware editing.
 
 ## Later v2 direction
