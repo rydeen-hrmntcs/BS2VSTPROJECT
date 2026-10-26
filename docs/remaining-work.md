@@ -139,7 +139,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
 - [ ] **AFX, last synth feature area:** [read-only research/capture](afx-protocol-research.md)
   now preserves25 active data records, repeated byte-identically with o0 reported.
   Name reads timed out; buffer provenance, full8-bank capture and restoration
-  remain unverified. No mutations sent; local browser/editor is next.
+  remain unverified. No mutations sent. The [local archive browser](afx-local-browser.md)
+  now opens strict25-record captures, selects keys and saves byte-identical copies;
+  plugin parameter editing and hardware transfer are later increments.
   Remaining scope: overlay-bank selection, protection,
   per-note data editing, transfer and explicit save/clear operations. The manual
   documents dedicated messages; their presence does not verify our hardware

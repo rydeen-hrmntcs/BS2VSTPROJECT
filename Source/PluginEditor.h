@@ -8,6 +8,7 @@
 #include "BSIIPresetSync.h"
 #include "BSIIMicroTunePage.h"
 #include "BSIIBankPage.h"
+#include "BSIIAfxPage.h"
 
 class ParameterControl : public juce::Component
 {
@@ -155,6 +156,7 @@ private:
 
     std::unique_ptr<MicroTunePage> microTunePage;
     std::unique_ptr<BankPage> bankPage;
+    std::unique_ptr<AfxPage> afxPage;
     std::unique_ptr<HardwareChannelControl> hardwareChannelControl;
     std::vector<std::unique_ptr<ParameterControl>> parameterControls;
     std::vector<std::unique_ptr<ChoiceControl>> choiceControls;

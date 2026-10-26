@@ -548,6 +548,53 @@ int main (int argc, char** argv)
         editor.reset();pump();editor.reset(processor.createEditor());pump();
         check(processor.getLocalBank()==saved && processor.getLocalBankSelection()==11 && capture.messages.load()==count+1,"editor reopen keeps workspace without resending");
     }
+    // AFX archive viewing/export is local, preserves unknown bytes and survives editor recreation.
+    {
+        juce::MemoryBlock raw;
+        for(int key=0;key<25;++key)
+        {
+            juce::uint8 message[106]{0xf0,0,0x20,0x29,0,0x33,0,0x4e,static_cast<juce::uint8>(key)};
+            message[9]=key==0?0:64;message[30]=static_cast<juce::uint8>(key);message[105]=0xf7;
+            raw.append(message,sizeof(message));
+        }
+        AfxPage* afx=nullptr;
+        for(auto* child:editor->getChildren())if(auto* tabs=dynamic_cast<juce::TabbedComponent*>(child))
+        {const auto i=tabs->getTabNames().indexOf("AFX");if(i>=0){tabs->setCurrentTabIndex(i);afx=dynamic_cast<AfxPage*>(tabs->getTabContentComponent(i));}}
+        check(afx!=nullptr,"AFX local page available");
+        if(afx)
+        {
+            const auto before=processor.getParameters().copyState();const auto count=capture.messages.load();
+            const int preset=processor.getKnownHardwareProgram();
+            const auto file=report.getChildFile("synthetic-afx.syx");file.replaceWithData(raw.getData(),raw.getSize());
+            check(afx->loadArchiveFile(file),"actual AFX page accepts 25 data replies without names");
+            auto* key=findComponent<juce::TextButton>(*afx,[](auto& c){return c.getComponentID()=="afx-key-24";});
+            for(int i=0;i<25;++i)
+            {
+                auto* button=findComponent<juce::TextButton>(*afx,[i](auto& c){return c.getComponentID()=="afx-key-"+juce::String(i);});
+                check(button!=nullptr,"each AFX key exists");
+                if(button){button->triggerClick();pump(5);check(processor.getLocalAfxSelection()==i,"each AFX key selects its exact wire index");}
+            }
+            check(key && processor.getLocalAfxSelection()==24,"last visible AFX key selects wire index24");
+            auto* description=findComponent<juce::Label>(*afx,[](auto& c){return c.getText().contains("wire index 24");});
+            check(description && description->getText().contains("Name unavailable"),"selected record shows absent name explicitly");
+            const auto copy=report.getChildFile("afx-exact-copy.syx");juce::MemoryBlock saved;
+            check(afx->saveArchiveFile(copy) && copy.loadFileAsData(saved) && saved==raw,"local AFX copy preserves every original byte");
+            const auto previous=processor.getLocalAfxArchive();
+            check(!afx->loadArchiveFile(report.getChildFile("absent-afx.syx")) && processor.getLocalAfxArchive()==previous,"bad AFX open keeps previous archive");
+            check(!afx->saveArchiveFile(report.getChildFile("missing-dir/afx.syx")),"failed AFX save reported");
+            check(picture(*afx,report.getChildFile("afx-browser.png")),"AFX local browser rendered");
+            editor->setSize(760,600);pump();check(picture(*editor,report.getChildFile("afx-small.png")),"AFX minimum-size render");
+            for(auto* child:afx->getChildren())if(auto* viewport=dynamic_cast<juce::Viewport*>(child))viewport->setViewPosition(0,10000);
+            pump();check(picture(*editor,report.getChildFile("afx-small-detail.png")),"AFX selected details reachable at minimum size");
+            juce::MemoryBlock state;processor.getStateInformation(state);
+            BSIIControlAudioProcessor fresh;fresh.setStateInformation(state.getData(),static_cast<int>(state.getSize()));
+            check(!fresh.getLocalAfxArchive(),"AFX archive is not serialized for automatic replay");
+            editor.reset();pump();editor.reset(processor.createEditor());pump();
+            check(processor.getLocalAfxArchive()==previous && processor.getLocalAfxSelection()==24,"AFX workspace survives editor closure");
+            check(before.isEquivalentTo(processor.getParameters().copyState()) && capture.messages.load()==count
+                  && processor.getKnownHardwareProgram()==preset && listener.parameters==0,"AFX browsing/export is silent and preserves host parameters and current sound identity");
+        }
+    }
     // Actual processor-owned stored transaction, using only a private virtual BSII.
     {
         StoredDevice device;

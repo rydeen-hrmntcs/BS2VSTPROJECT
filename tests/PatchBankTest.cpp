@@ -1,4 +1,5 @@
 #include "BSIIPatchBank.h"
+#include "BSIIAfxArchive.h"
 #include "BSIIStoredPatchWrite.h"
 #include <iostream>
 #include <cstring>
@@ -43,6 +44,35 @@ int main(int argc,char** argv)
     }
     bad=raw;static_cast<juce::uint8*>(bad.getData())[8]=126;reject(bad); // Duplicate index.
     bad=raw;static_cast<juce::uint8*>(bad.getData())[8]=128;reject(bad);
+    // Opaque AFX local archive: never infer hardware bank identity or rewrite bytes.
+    {
+        juce::MemoryBlock raw;
+        for(int key=24;key>=0;--key)
+        {
+            juce::uint8 data[106]{0xf0,0,0x20,0x29,0,0x33,0,0x4e,static_cast<juce::uint8>(key)};
+            data[9]=key==3?0:64;data[105]=0xf7;raw.append(data,sizeof(data));
+            if(key==3)
+            {
+                juce::uint8 name[26]{0xf0,0,0x20,0x29,0,0x33,0,0x53,3};
+                std::fill(name+9,name+25,' ');name[25]=0xf7;raw.append(name,sizeof(name));
+            }
+        }
+        juce::String error;auto archive=bsii::AfxArchive::parse(raw,"test-afx.syx",error);
+        check(archive && archive->bytes()==raw && archive->nameCount()==1,"AFX preserves input order/raw bytes with partial name coverage");
+        if(archive)
+        {
+            check(archive->key(3)->present && !archive->key(0)->present,"AFX presence uses contiguous packed first byte");
+            check(archive->key(3)->displayName()=="(empty name)" && archive->key(0)->displayName()=="Name unavailable","empty and unavailable names remain distinct");
+            check(!archive->key(-1) && !archive->key(25),"AFX key access bounds checked");
+        }
+        const auto rejects=[&](juce::MemoryBlock bytes){check(!bsii::AfxArchive::parse(bytes,"bad",error) && error.isNotEmpty(),"AFX malformed/unsupported/incomplete archive rejected");};
+        rejects(fixture);rejects(juce::MemoryBlock(raw.getData(),raw.getSize()-1));
+        auto bad=raw;bad.append(raw.getData(),106);rejects(bad);
+        bad=raw;static_cast<juce::uint8*>(bad.getData())[8]=25;rejects(bad);
+        bad=raw;static_cast<juce::uint8*>(bad.getData())[20]=128;rejects(bad);
+        bad=raw;static_cast<juce::uint8*>(bad.getData())[7]=0x4c;rejects(bad);
+        const juce::uint8 extra=0;bad=raw;bad.append(&extra,1);rejects(bad);
+    }
     // Exercise transactions against an independent synthetic hardware bank.
     {
         using Write=bsii::StoredPatchWrite;

@@ -148,6 +148,7 @@ to finish before playback. Existing Sets default to Off. Stored-preset and captu
 | **Send .syx → BSII** | Sends one validated 154-byte temporary edit-buffer patch. Rejects banks, stored-patch commands, other SysEx and malformed/trailing data without sending. See [file-send limits](docs/edit-buffer-file-send.md). |
 | **Banks → Open Bank / Load Selected** | Browse a complete 128-patch bank locally; explicitly load one entry into the temporary buffer. Those actions do not write stored presets. See [bank browser](docs/bank-browser.md). |
 | **Banks → Prepare / Write stored preset…** | Saves a fresh current-sound/full-bank backup, previews one destination, asks for explicit confirmation and verifies all stored slots afterward. See [stored-preset writer](docs/stored-preset-writer.md). |
+| **AFX → Open archive / Save exact copy** | Inspect a local 25-key AFX data archive and preserve its bytes. Names may be unavailable. No hardware edits or sends. See [AFX browser](docs/afx-local-browser.md). |
 | **Arm Patch Capture** | Arms receipt of the next manual dump. Perform the dump on the hardware, then save the received message. |
 | **Save Last .syx…** | Saves the last received SysEx message unchanged. Use Get Patch or a manual capture first to obtain a fresh one. |
 

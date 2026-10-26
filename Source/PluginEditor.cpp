@@ -525,6 +525,8 @@ void BSIIControlAudioProcessorEditor::buildPages()
         return true;
     }, [this]{ return !patchRequestPending && !presetSync.pending() && !sysExCaptureArmed; });
     tabs.addTab ("Banks", juce::Colours::transparentBlack, bankPage.get(), false);
+    afxPage=std::make_unique<AfxPage>(processor);
+    tabs.addTab("AFX",juce::Colours::transparentBlack,afxPage.get(),false);
 }
 
 void BSIIControlAudioProcessorEditor::paint (juce::Graphics& g)

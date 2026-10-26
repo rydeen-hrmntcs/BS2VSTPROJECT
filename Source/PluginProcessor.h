@@ -6,6 +6,7 @@
 #include "BSIIMidi.h"
 #include "BSIITuningDocument.h"
 #include "BSIIPatchBank.h"
+#include "BSIIAfxArchive.h"
 #include "BSIIStoredPatchWrite.h"
 #include "BSIIHardwareSysExInput.h"
 
@@ -85,6 +86,14 @@ public:
     { localBank = std::move(bank); localBankSelection = localBank ? 0 : -1; }
     void selectLocalBankEntry (int index)
     { if (localBank && juce::isPositiveAndBelow(index,128)) localBankSelection = index; }
+
+    // Transient local AFX inspection workspace; no MIDI or host-state replay.
+    std::shared_ptr<const bsii::AfxArchive> getLocalAfxArchive() const {return localAfxArchive;}
+    int getLocalAfxSelection() const {return localAfxSelection;}
+    void setLocalAfxArchive(std::shared_ptr<const bsii::AfxArchive> archive)
+    {localAfxArchive=std::move(archive);localAfxSelection=localAfxArchive?0:-1;}
+    void selectLocalAfxKey(int key)
+    {if(localAfxArchive && juce::isPositiveAndBelow(key,25))localAfxSelection=key;}
 
     struct StoredWriteInfo
     {
@@ -178,6 +187,8 @@ private:
     juce::MemoryBlock storedPlanDocument;
     std::atomic<bool> cancelStoredWriteRequested { false };
 
+    std::shared_ptr<const bsii::AfxArchive> localAfxArchive;
+    int localAfxSelection=-1;
     std::shared_ptr<const bsii::PatchBank> localBank;
     int localBankSelection = -1;
     juce::AudioProcessorValueTreeState apvts;

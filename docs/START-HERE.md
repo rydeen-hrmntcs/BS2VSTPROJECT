@@ -168,8 +168,12 @@ ResearchTools passed3/3. User reported o0. Two25-record data collections matched
 exactly; name request54/key0 timed out. Names, saved-bank identity and restoration
 remain unverified. No banks/protection/overlays were changed or saved, and the
 ordinary patch was unchanged. Components screenshots provide a25-key/per-key
-side-panel reference, with Live Edit off. Next: local opaque AFX document/browser,
-then reviewed backup/restore before hardware editing. No plugin AFX page yet.
+side-panel reference, with Live Edit off. The local opaque [AFX browser](afx-local-browser.md) is implemented and installed.
+Focused AfxOffline/PatchBankOffline and native editor checks passed (zero failures),
+including all25 local selections and exact-byte copying without MIDI. Installed
+signatures/notices and AU validation passed after confirmed Live exit. Next:
+manual Ableton AFX open/select/copy check using Downloads/BSII-AFX-active-buffer-2026-10-27.syx.
+No hardware-send/edit controls are added. Reviewed backup/restore remains required before hardware editing.
 
 ## Later v2 direction
 

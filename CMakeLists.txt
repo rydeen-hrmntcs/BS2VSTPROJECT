@@ -62,6 +62,9 @@ target_sources(BSIIControl PRIVATE
     Source/BSIIMicroTunePage.h
     Source/BSIIPatchBank.h
     Source/BSIIStoredPatchWrite.h
+    Source/BSIIAfxArchive.h
+    Source/BSIIAfxPage.h
+    Source/BSIIAfxPage.cpp
     Source/BSIIBankPage.cpp
     Source/BSIIBankPage.h
     Source/BSIIScalaImportPanel.cpp

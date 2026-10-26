@@ -3,6 +3,14 @@
 For current evidence and unfinished work, see [the 19 October checklist](remaining-work.md).
 Earlier entries below preserve implementation chronology.
 
+## Local AFX archive browser — 27 October 2026
+
+AFX opens25-key data archives locally, shows overlay presence and available names,
+and saves exact raw copies. Missing and blank names remain distinct. Transient
+archive/selection survive editor closure without host-state replay; no automation
+parameters or MIDI actions were added. Hardware names, saved-bank identity and
+restoration remain unverified. See [local scope](afx-local-browser.md).
+
 ## Explicit stored-preset writer — 26 October 2026
 
 Banks now has a separate destination, Prepare and confirmed Write action. It
