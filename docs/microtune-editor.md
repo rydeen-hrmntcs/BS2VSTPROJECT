@@ -86,8 +86,13 @@ temperament. The action addresses table 0 only and has no persistent save.
 The offline codec and native editor checks passed. The native check exercised
 Cancel and Send through the dialog, captured all 64 messages on a private
 virtual MIDI port, and verified pacing, editor closure and interruption
-without automatic resume. The physical check of the full-table plugin action
-is pending.
+without automatic resume. The AU and VST3 were installed locally after Live
+quit and passed strict signature and license checks. Apple AU validation passed.
+
+The user confirmed the full-table send and restore in Ableton with the Audient
+iD14 and Tuner, using the A3 spot check. The test table targets −25 cents on
+MIDI key 69. The standard table restored its baseline. Exact hosted readings
+were not recorded. This checks the plugin workflow and one audible pitch.
 
 ## Working state and DAW projects
 
