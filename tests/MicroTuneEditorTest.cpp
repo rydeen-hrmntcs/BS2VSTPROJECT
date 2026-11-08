@@ -603,6 +603,56 @@ int main (int argc, char** argv)
                   && processor.getKnownHardwareProgram()==preset && listener.parameters==0,"AFX browsing/export is silent and preserves host parameters and current sound identity");
         }
     }
+    // Explicit MicroTune transfer uses only the private virtual MIDI port.
+    page = showPage (*editor);
+    table = page ? findTable (*page) : nullptr;
+    check (page && table, "MicroTune page available for scoped transfer");
+    if (page && table)
+    {
+        const auto button = "Send Notes to Table 0";
+        const auto count = capture.messages.load();
+        const auto apvtsBefore = processor.getParameters().copyState();
+        const auto preset = processor.getKnownHardwareProgram();
+        auto document = processor.getLocalTuningInfo().document;
+        document.targetTable = 1;
+        document.table.setCents (69, 25);
+        document.table.setCents (70, -25);
+        processor.replaceLocalTuningDocument (document);
+        table->selectRow (69);
+        pump();
+        check (! click (*page, button), "send unavailable for stored table targets");
+
+        document.targetTable = 0;
+        processor.replaceLocalTuningDocument (document);
+        const auto revision = processor.getLocalTuningInfo().revision;
+        table->deselectAllRows();
+        pump();
+        check (! click (*page, button), "send unavailable without selected notes");
+        table->selectRangeOfRows (68, 70);
+        check (! click (*page, button), "send unavailable for a larger selection");
+        table->selectRow (69);
+
+        auto output = std::move (processor.hardwareMidiOutput());
+        check (click (*page, button) && capture.messages.load() == count,
+               "missing output and local edits emit no MIDI");
+        processor.hardwareMidiOutput() = std::move (output);
+
+        check (click (*page, button), "explicit one-note send available");
+        constexpr juce::uint8 one[] { 0xf0, 0x7f, 0, 8, 2, 0, 1, 69, 69, 0x20, 0, 0xf7 };
+        check (capture.messages.load() == count + 1 && capture.received (juce::MemoryBlock (one, sizeof one)),
+               "one-note send dispatches exactly one table 0 SysEx");
+        table->selectRangeOfRows (69, 70);
+        check (click (*page, button), "explicit two-note send available");
+        constexpr juce::uint8 two[] { 0xf0, 0x7f, 0, 8, 2, 0, 2, 69, 69, 0x20, 0, 70, 69, 0x60, 0, 0xf7 };
+        check (capture.messages.load() == count + 2 && capture.received (juce::MemoryBlock (two, sizeof two)),
+               "two-note send dispatches both pitches together with no additional messages");
+        check (processor.getLocalTuningInfo().revision == revision
+               && apvtsBefore.isEquivalentTo (processor.getParameters().copyState())
+               && processor.getKnownHardwareProgram() == preset,
+               "explicit transfer preserves local document, parameters and preset");
+        check (picture (*editor, report.getChildFile ("tuning-table-zero-send.png")),
+               "temporary tuning transfer UI renders");
+    }
     // Actual processor-owned stored transaction, using only a private virtual BSII.
     {
         StoredDevice device;

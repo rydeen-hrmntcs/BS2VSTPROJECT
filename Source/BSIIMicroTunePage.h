@@ -29,6 +29,8 @@ private:
     void chooseSave();
     void chooseScala();
     void newTable();
+    void updateSendButton();
+    void sendSelectedNotes();
     void bulkEdit (bsii::microtuning::BulkEdit);
     void selectedRowsChanged (int) override;
 
@@ -44,7 +46,8 @@ private:
     juce::TextButton undoButton { "Undo" }, redoButton { "Redo" }, allButton { "Select All" },
         setButton { "Set Offset" }, addButton { "Add Cents" }, resetButton { "Reset Notes" };
     juce::TextEditor bulkCents;
-    juce::Label selectionHint;
+    juce::TextButton sendButton { "Send Notes to Table 0" };
+    juce::Label selectionHint, sendStatus;
     juce::TableListBox table { "MicroTune notes", this };
     std::unique_ptr<TuningView> tuningView;
     std::unique_ptr<juce::FileChooser> chooser;

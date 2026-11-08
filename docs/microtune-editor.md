@@ -1,9 +1,9 @@
 # MicroTune editor page
 
 Added 19 October 2026, using the existing offline table model and file format.
-The **MicroTune** tab edits a local working table. It does not read, send or save
-hardware tuning tables. The existing FX + Perf MicroTune Table parameter still
-selects the synth's active table separately.
+The **MicroTune** tab edits a local working table and can explicitly send one or
+two selected pitches to temporary hardware table 0. The FX + Perf MicroTune
+Table parameter selects the synth's active table separately.
 
 ## Use
 
@@ -40,7 +40,24 @@ selects the synth's active table separately.
 
 No synth is required for these operations. The existing offline file tool can
 export this JSON format to SysEx; see [offline tool instructions](microtune-offline.md).
-There is no hardware Send or Save Tables action on this page.
+### Send selected pitches to temporary table 0
+
+Set **File target** to **0**, select one or two rows, then click **Send Notes
+to Table 0**. The plugin sends one message to its selected MIDI output. To
+hear the result, use **FX + Perf → MicroTune Table** to select table 0 on
+the synth. The send does not change the active table.
+
+To return those pitches to equal temperament, select the same notes, use
+**Reset Notes**, then send them again. Undo and Redo work on the local
+document. They do not resend pitches. The send status reports dispatch.
+Use a tuner to verify the synth's pitch. Table readback, stored table
+writes and persistent save are outside this workflow.
+
+The offline codec and native editor checks passed. The native check captured
+the exact one-note and two-note messages on a private virtual MIDI port and
+checked that local edits, disallowed selections and a missing output are silent.
+The AU and VST3 Release builds passed. The new send action still needs its
+hosted hardware check in Ableton.
 
 ## Working state and DAW projects
 
@@ -62,7 +79,7 @@ inside the Set does not change that hardware-recall limitation.
 
 Document edits notify the host that non-parameter state changed; they are not
 95 new automation lanes. The existing **95 parameters and indices** are unchanged.
-No MIDI transmission or persistent-save command is connected to these actions.
+Only the explicit **Send Notes to Table 0** action dispatches tuning MIDI.
 
 ## Bounds and presentation
 
@@ -188,6 +205,6 @@ octave update both keyboard labels and selected table note in Ableton
 (25 October 2026).
 
 On 8 November 2026 a direct single-note send and restore to table 0 passed using
-the Audient iD14 and Ableton Tuner. The editor still works locally. Tables 1–8
-must be preserved, and hardware tuning-table backup remains unresolved.
+the Audient iD14 and Ableton Tuner. The two-note direct test also passed.
+Tables 1–8 must be preserved, and hardware tuning-table backup remains unresolved.
 See the [hardware check](microtune-transfer-research.md#single-note-hardware-check--8-november-2026).

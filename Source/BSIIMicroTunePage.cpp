@@ -206,11 +206,11 @@ MicroTunePage::MicroTunePage (BSIIControlAudioProcessor& p) : processor (p)
     addAndMakeVisible (viewport);
     for (auto* component : std::initializer_list<juce::Component*> { &heading, &hint, &nameLabel,
             &nameEditor, &targetLabel, &target, &status, &newButton, &loadButton, &saveButton, &table, &undoButton, &redoButton, &allButton,
-            &setButton, &addButton, &resetButton, &bulkCents, &selectionHint, &importButton })
+            &setButton, &addButton, &resetButton, &bulkCents, &selectionHint, &importButton, &sendButton, &sendStatus })
         content.addAndMakeVisible (component);
     heading.setText ("MicroTune - local table", juce::dontSendNotification);
     heading.setFont (juce::FontOptions (18.0f).withStyle ("Bold"));
-    hint.setText ("Edit locally. Nothing is sent to the synth. Frequencies are calculated, not measured.", juce::dontSendNotification);
+    hint.setText ("Edits are local until explicitly sent. Frequencies are calculated, not measured.", juce::dontSendNotification);
     hint.setColour (juce::Label::textColourId, juce::Colours::lightblue);
     nameLabel.setText ("Name", juce::dontSendNotification);
     nameEditor.setInputRestrictions (128);
@@ -236,6 +236,9 @@ MicroTunePage::MicroTunePage (BSIIControlAudioProcessor& p) : processor (p)
     setButton.onClick = [this] { bulkEdit (bsii::microtuning::BulkEdit::setOffset); };
     addButton.onClick = [this] { bulkEdit (bsii::microtuning::BulkEdit::addCents); };
     resetButton.onClick = [this] { bulkEdit (bsii::microtuning::BulkEdit::reset); };
+    sendButton.onClick = [this] { sendSelectedNotes(); };
+    sendButton.setTooltip ("Replace only the selected pitches in temporary hardware table 0.");
+    sendStatus.setText ("Set File target to 0 and select one or two notes.", juce::dontSendNotification);
     bulkCents.setText ("0", false);
     bulkCents.setComponentID ("bulkCents");
     bulkCents.setTooltip ("Signed cents. Set Offset replaces offsets; Add Cents shifts current pitches.");
@@ -264,7 +267,7 @@ MicroTunePage::~MicroTunePage()
 void MicroTunePage::resized()
 {
     viewport.setBounds (getLocalBounds());
-    const auto height = juce::jmax (730, getHeight());
+    const auto height = juce::jmax (766, getHeight());
     const auto width = juce::jmax (1, getWidth() - (height > getHeight() ? viewport.getScrollBarThickness() : 0));
     content.setSize (width, height);
     auto area = content.getLocalBounds().reduced (12);
@@ -292,6 +295,11 @@ void MicroTunePage::resized()
     addButton.setBounds (bulk.removeFromLeft (100)); bulk.removeFromLeft (8);
     resetButton.setBounds (bulk.removeFromLeft (108));
     area.removeFromTop (8);
+    auto transfer = area.removeFromTop (28);
+    sendButton.setBounds (transfer.removeFromLeft (180));
+    transfer.removeFromLeft (8);
+    sendStatus.setBounds (transfer);
+    area.removeFromTop (8);
     tuningView->setBounds (area.removeFromTop (264));
     area.removeFromTop (8);
     status.setBounds (area.removeFromBottom (30));
@@ -307,6 +315,7 @@ void MicroTunePage::refresh()
     shown = latest;
     undoButton.setEnabled (shown.canUndo);
     redoButton.setEnabled (shown.canRedo);
+    updateSendButton();
     displayedRevision = shown.revision;
     if (! nameEditor.hasKeyboardFocus (true)) nameEditor.setText (shown.document.name, false);
     target.setSelectedId (shown.document.targetTable + 1, juce::dontSendNotification);
@@ -376,6 +385,49 @@ void MicroTunePage::selectedRowsChanged (int)
     const auto count = table.getNumSelectedRows();
     selectionHint.setText (juce::String (count) + " selected - Shift/Command-click Key or Note to select.", juce::dontSendNotification);
     for (auto* button : { &setButton, &addButton, &resetButton }) button->setEnabled (count > 0);
+    updateSendButton();
+}
+
+void MicroTunePage::updateSendButton()
+{
+    const auto count = table.getNumSelectedRows();
+    sendButton.setEnabled (shown.document.targetTable == 0 && count >= 1 && count <= 2);
+}
+
+void MicroTunePage::sendSelectedNotes()
+{
+    const auto document = processor.getLocalTuningInfo().document;
+    const auto selected = table.getSelectedRows();
+    const auto count = selected.size();
+    juce::String result;
+    if (document.targetTable != 0 || count < 1 || count > 2)
+        result = "Set File target to 0 and select one or two notes.";
+    else if (processor.isStoredPatchBusy())
+        result = "Wait for the stored-preset operation to finish.";
+    else if (auto& output = processor.hardwareMidiOutput(); output != nullptr)
+    {
+        std::vector<bsii::microtuning::NoteChange> changes;
+        for (int i = 0; i < count; ++i)
+        {
+            const auto key = selected[i];
+            const auto pitch = document.table.pitch (key);
+            if (pitch) changes.push_back ({ key, *pitch });
+        }
+
+        const auto encoded = bsii::microtuning::encodeChanges (0, changes, 2);
+        if (static_cast<int> (changes.size()) != count || ! encoded)
+            result = "Cannot send the selected pitches.";
+        else
+        {
+            const auto& packet = encoded->front();
+            output->sendMessageNow (juce::MidiMessage (packet.data(), static_cast<int> (packet.size()), 0.0));
+            result = "Dispatched to table 0. Check the pitch on the synth.";
+        }
+    }
+    else
+        result = "Choose a MIDI output before sending.";
+
+    sendStatus.setText (result, juce::dontSendNotification);
 }
 
 void MicroTunePage::bulkEdit (bsii::microtuning::BulkEdit operation)

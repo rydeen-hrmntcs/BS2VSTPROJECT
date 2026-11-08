@@ -124,8 +124,9 @@ from the old chat. Verify the current checkout and validation status first.
    and installed after confirmed Live exit. Installed signatures/notices and AU
    validation passed. The user confirmed both octave buttons update keyboard
    labels and table selection in Ableton.
-   A single-note hardware transfer passed using a direct MIDI probe. The
-   MicroTune editor still works locally. See microtune-editor.md.
+   Single-note and two-note transfers passed using direct MIDI probes.
+   MicroTune can explicitly send one or two selected pitches to temporary table 0.
+   See microtune-editor.md.
    Sequence slot 1 was authorized for replacement; all four
    Play selections worked. External MIDI recording failed to advance steps in
    this setup (Sync Off, IN routing); paused pending stronger evidence. The
