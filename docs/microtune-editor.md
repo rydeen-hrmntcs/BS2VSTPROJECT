@@ -42,10 +42,14 @@ No synth is required for these operations. The existing offline file tool can
 export this JSON format to SysEx; see [offline tool instructions](microtune-offline.md).
 ### Send selected pitches to temporary table 0
 
-Set **File target** to **0**, select one or two rows, then click **Send Notes
-to Table 0**. The plugin sends one message to its selected MIDI output. To
-hear the result, use **FX + Perf → MicroTune Table** to select table 0 on
-the synth. The send does not change the active table.
+Set **File target** to **0**. Click a Key or Note cell, a point on the graph,
+or a key in the visual keyboard to select the note. The counter beside Undo
+and Redo must show one or two selected notes to enable **Send Notes to Table 0**.
+Editing a cents cell can leave the selection empty.
+
+The plugin sends one message to its selected MIDI output. To hear the result,
+the synth must be playing table 0. The hardware table selector in **FX + Perf**
+is separate from **File target** and the send does not change it.
 
 To return those pitches to equal temperament, select the same notes, use
 **Reset Notes**, then send them again. Undo and Redo work on the local
@@ -56,8 +60,11 @@ writes and persistent save are outside this workflow.
 The offline codec and native editor checks passed. The native check captured
 the exact one-note and two-note messages on a private virtual MIDI port and
 checked that local edits, disallowed selections and a missing output are silent.
-The AU and VST3 Release builds passed. The new send action still needs its
-hosted hardware check in Ableton.
+The AU and VST3 Release builds were installed locally after Live quit. Both
+passed strict signature and license checks. Apple AU validation passed.
+In Ableton the user selected key 69 on the graph and dispatched its +25-cent
+offset. Tuner read +24.6 cents. Reset Notes followed by another send restored
+the pitch near baseline, as confirmed by the user.
 
 ## Working state and DAW projects
 
