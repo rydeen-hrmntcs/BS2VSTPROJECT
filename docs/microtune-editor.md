@@ -45,7 +45,8 @@ export this JSON format to SysEx; see [offline tool instructions](microtune-offl
 Set **File target** to **0**. Click a Key or Note cell, a point on the graph,
 or a key in the visual keyboard to select the note. The counter beside Undo
 and Redo must show one or two selected notes to enable **Send Notes to Table 0**.
-Editing a cents cell can leave the selection empty.
+Editing a cents cell can leave the selection empty. Selecting more than two notes
+disables Send. Two entries per message is the largest batch tested on hardware so far.
 
 The plugin sends one message to its selected MIDI output. To hear the result,
 the synth must be playing table 0. The hardware table selector in **FX + Perf**
@@ -64,7 +65,9 @@ The AU and VST3 Release builds were installed locally after Live quit. Both
 passed strict signature and license checks. Apple AU validation passed.
 In Ableton the user selected key 69 on the graph and dispatched its +25-cent
 offset. Tuner read +24.6 cents. Reset Notes followed by another send restored
-the pitch near baseline, as confirmed by the user.
+the pitch near baseline, as confirmed by the user. The user then confirmed
+the two-note send in Ableton with key 69 at +25 cents and key 70 at −25 cents,
+followed by a successful Reset Notes and resend for both keys.
 
 ## Working state and DAW projects
 
