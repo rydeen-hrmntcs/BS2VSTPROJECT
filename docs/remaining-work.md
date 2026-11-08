@@ -111,7 +111,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   restore at that spacing passed acoustic spot checks at packets 1, 32 and 64.
   The plugin has an explicit full-table send with the same minimum 20 ms
   spacing. The user confirmed the Ableton send and restore using A3 as the
-  acoustic spot check. Table readback and persistent save remain open.
+  acoustic spot check. [Readback research](microtune-readback-research.md)
+  found no documented or Components-backed export of existing tables 1–8.
+  Keep writes in temporary table 0 until a recovery route is verified.
   Table selection is hardware-tested.
 - [ ] **Remaining tuning imports:** [Scala `.scl`/`.kbm` import](scala-import.md)
   now has local preview, explicit reference/mapping and unavailable-note handling,
