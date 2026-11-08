@@ -130,6 +130,13 @@ A direct CoreMIDI message addressed only note 69 in table 0:
 - Standard pitch: `F0 7F 00 08 02 00 01 45 45 00 00 F7`. The user confirmed
   the reading returned near baseline. An exact final reading was not recorded.
 
-No save message or updates targeting tables 1–8 were sent. This verifies one
-temporary tuning change and acoustic restoration. It leaves neighboring-note
-isolation, negative offsets, batches, table readback and plugin transfer open.
+The negative-offset check used the same audio setup. Baselines were A at +0.3
+cents and A♯ at 0 cents. With table 0 confirmed again, the message
+`F0 7F 00 08 02 00 01 45 44 60 00 F7` targeted MIDI note 69 at −25 cents.
+A measured −25.4 cents and A♯ stayed at 0 cents. After sending the same
+standard-pitch message above, A measured +0.3 cents again.
+
+All test messages addressed note 69 in temporary table 0. The positive and
+negative single-note changes and restoration passed acoustically, with MIDI
+note 70 serving as the neighboring-note control for the negative test. Batch
+transfer, table readback, persistent save and plugin transfer remain open.
