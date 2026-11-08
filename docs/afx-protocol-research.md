@@ -139,3 +139,29 @@ observed firmware. Prior4.14 references are historical user reports or the
 manual version consulted; do not silently relabel older captures as verified
 4.14 or4.15. The exact update timing was not established. This does not resolve
 the unanswered54/name request or prove a retail-version/Components commit mapping.
+
+## Bank 1 backup check — 8 November 2026
+
+The user reported `o-0` and confirmed they had no custom AFX edits to keep.
+The initial ordinary patch and active overlay data were captured before any
+bank change. The `o-0` data matched the 27 October capture exactly. The first
+name request timed out again.
+
+The user selected `o-1` on the hardware. Two complete read-only captures
+returned 25 data records and 25 name records each. They matched byte for
+byte and contained 25 distinct data payloads. The bank 1 data differed from
+the `o-0` data. This establishes successful name reads on a selected bank
+for this unit. It does not establish a firmware-wide name gate or explain
+the `o-0` timeout conclusively.
+
+The archive is 3,300 bytes, SHA-256
+`f1a68ab676602a430df04c4e504ff9446839c157c9c68c387acb8e63a4c3f0fe`.
+Raw captures and the repeat comparison are retained locally in
+`midi-lab-results/20261108-224818-afx-active-b203f9/` and
+`midi-lab-results/20261108-224824-afx-active-32c7c6/`.
+A byte-identical copy is in Downloads as `BSII-AFX-bank-1-2026-11-08.syx`.
+
+After the user returned to `o-0`, the ordinary edit-buffer readback matched
+the original 154-byte patch exactly. The tools sent only read requests.
+Bank identity was confirmed at the panel, and restore of overlay contents
+by replay, write protection and backups of banks 2–8 remain unverified.

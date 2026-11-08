@@ -147,9 +147,10 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   action requires Prepare, a saved backup and explicit confirmation; no full-bank
   write workflow exists.
 - [ ] **AFX, last synth feature area:** [read-only research/capture](afx-protocol-research.md)
-  now preserves25 active data records, repeated byte-identically with o0 reported.
-  Name reads timed out; buffer provenance, full8-bank capture and restoration
-  remain unverified. No mutations sent. The [local archive browser](afx-local-browser.md)
+  captures 25 active data records. With `o-1` selected at the hardware, two
+  complete 25-data/25-name captures matched byte for byte. Names timed out at
+  `o-0`. Backups of banks 2–8 and overlay content restoration remain open.
+  The [local archive browser](afx-local-browser.md)
   opens strict 25-record captures, selects keys and saves byte-identical copies.
   The installed read-only view shows 85 decoded settings per populated key.
   The selected values refreshed in Ableton. Parameter editing and hardware
