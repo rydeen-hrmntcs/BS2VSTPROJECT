@@ -168,3 +168,19 @@ Two messages with the same spacing restored the four keys to standard pitch.
 The user measured +0.3, 0, +0.3 and +0.4 cents, matching all four baselines.
 This verifies a two-message sequence at that spacing on this setup. Longer
 sequences and full-table transfer still need hardware validation.
+
+### Full table 0 transfer — 8 November 2026
+
+After the restart prompt and the user's acknowledgement, an edit-buffer
+readback confirmed table 0. Baselines for MIDI keys 48, 69 and 84 were
++0.2, +0.3 and +0.5 cents. The offline codec generated 128 unique note entries
+in 64 two-note packets. The three test keys were placed in packets 1, 32 and
+64 and assigned +25, −25 and +25 cents. The other entries used standard pitch.
+CoreMIDI dispatched the packets with a 20 ms wait between messages.
+
+The user confirmed the three test pitches moved as expected. A second
+64-packet dispatch assigned standard pitch to all 128 keys. The user
+confirmed that all three test pitches returned to baseline. Exact shifted
+and final readings were not recorded. This is acoustic sampling of three
+positions in a full-length transfer. The other pitches were not measured.
+All packets targeted temporary table 0. No persistent-save command was sent.
