@@ -119,3 +119,17 @@ integration has been added. The proposed hardware plan above remains pending.
 The subsequent [local editor page](microtune-editor.md) adds note editing and
 file load/save inside the plugin, plus silent DAW working-document persistence.
 It still has no hardware tuning-data send, readback or persistent-save action.
+
+## Single-note hardware check — 8 November 2026
+
+With the Audient iD14 audio return and Ableton Tuner at a 440 Hz reference, a
+held MIDI note 69 read A at +0.3 cents. Edit-buffer readback confirmed table 0.
+A direct CoreMIDI message addressed only note 69 in table 0:
+
+- +25 cents: `F0 7F 00 08 02 00 01 45 45 20 00 F7`. Tuner read A at +24.6 cents.
+- Standard pitch: `F0 7F 00 08 02 00 01 45 45 00 00 F7`. The user confirmed
+  the reading returned near baseline. An exact final reading was not recorded.
+
+No save message or updates targeting tables 1–8 were sent. This verifies one
+temporary tuning change and acoustic restoration. It leaves neighboring-note
+isolation, negative offsets, batches, table readback and plugin transfer open.

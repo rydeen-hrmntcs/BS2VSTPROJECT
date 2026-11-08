@@ -103,8 +103,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   between external MIDI-to-Arp and Arp-to-MIDI; no verified remote command.
 - [ ] **MicroTune hardware table workflow:** an [offline table editor and SysEx
   exporter](microtune-offline.md), plus a [local editor page](microtune-editor.md),
-  are implemented. Actual hardware transfer, readback/restoration, persistent save
-  remain pending; table selection is already implemented and hardware-tested.
+  are implemented. A direct single-note send and restore passed acoustically in
+  table 0. Plugin transfer, batch validation, table readback and persistent save
+  remain open. Table selection is already implemented and hardware-tested.
 - [ ] **Remaining tuning imports:** [Scala `.scl`/`.kbm` import](scala-import.md)
   now has local preview, explicit reference/mapping and unavailable-note handling,
   and one-step undo. [Numeric `.tun` import](tun-import.md), including the current
@@ -142,7 +143,8 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   remain unverified. No mutations sent. The [local archive browser](afx-local-browser.md)
   opens strict 25-record captures, selects keys and saves byte-identical copies.
   The installed read-only view shows 85 decoded settings per populated key.
-  Its Ableton check, parameter editing and hardware transfer remain open.
+  The selected values refreshed in Ableton. Parameter editing and hardware
+  transfer remain open.
   Remaining scope: overlay-bank selection, protection,
   per-note data editing, transfer and explicit save/clear operations. The manual
   documents dedicated messages; their presence does not verify our hardware

@@ -36,10 +36,9 @@ from the old chat. Verify the current checkout and validation status first.
   with the editor closed; Off did not restore that capture; hardware Cutoff changed
   during automation after Off reconnect. Audio was not connected. Recall was last
   saved Off. See `docs/project-sound-recall.md` for evidence and limits.
-- Tuning transfer testing was deferred: the user needs tables 1–8 preserved and
-  had no audio routing for pitch measurement. Table 0 was authorized for a later
-  test and selected after power-cycle, but no tuning data was sent. Resume pitch
-  measurements only once audio/tuner is available; hardware backup is unresolved.
+- A single-note table 0 transfer and restore passed on 8 November with the
+  Audient iD14 and Ableton Tuner. Tables 1–8 are reserved for preservation.
+  See the [tuning test notes](microtune-transfer-research.md#single-note-hardware-check--8-november-2026).
 - Global Tune isolation (20 October): the paired-data candidate did not establish
   negative receive support. Later manual-adjustment problems disappeared with
   Ableton closed, an empty Set, and the original Set's BS2 track set to MIDI From
@@ -125,9 +124,9 @@ from the old chat. Verify the current checkout and validation status first.
    and installed after confirmed Live exit. Installed signatures/notices and AU
    validation passed. The user confirmed both octave buttons update keyboard
    labels and table selection in Ableton.
-   Hardware tuning transfer is deferred until audio-interface/tuner setup is
-   available; no tuning data has been sent. See
-   microtune-editor.md. Sequence slot 1 was authorized for replacement; all four
+   A single-note hardware transfer passed using a direct MIDI probe. The
+   MicroTune editor still works locally. See microtune-editor.md.
+   Sequence slot 1 was authorized for replacement; all four
    Play selections worked. External MIDI recording failed to advance steps in
    this setup (Sync Off, IN routing); paused pending stronger evidence. The
    ordinary patch dump stayed byte-identical across an audible note change.
@@ -184,7 +183,8 @@ Manual copy saving remains separate. Capture file is
 Downloads/BSII-AFX-active-buffer-2026-10-27.syx.
 The 85-field read-only settings view passed focused and native editor checks.
 The AU and VST3 were installed on 8 November after Live quit. Apple AU validation
-passed. The next Ableton check is that the settings follow the selected key.
+passed. In Ableton the user confirmed the displayed Wave value changed between
+C2 and D2 with a local test archive.
 See [the AFX browser notes](afx-local-browser.md). Review backup and restoration
 before adding hardware editing.
 

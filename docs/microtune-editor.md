@@ -187,7 +187,7 @@ octave-button acceptance passed: the user confirmed Next octave and Previous
 octave update both keyboard labels and selected table note in Ableton
 (25 October 2026).
 
-On 8 November 2026 the user reported the BSII connected through an Audient iD14.
-Start with a pitch baseline using the current sound and tuning table 0. No tuning
-data has been sent. Table 0 was previously authorized for testing. Tables 1–8
+On 8 November 2026 a direct single-note send and restore to table 0 passed using
+the Audient iD14 and Ableton Tuner. The editor still works locally. Tables 1–8
 must be preserved, and hardware tuning-table backup remains unresolved.
+See the [hardware check](microtune-transfer-research.md#single-note-hardware-check--8-november-2026).

@@ -108,4 +108,7 @@ Both focused tests and the native editor test passed. The AU and VST3 Release
 bundles were installed locally on 8 November 2026 after Live quit. Both passed
 strict signature and license checks, and Apple AU validation passed. Local
 evidence and previous bundles are under `validation-results/afx-settings/`.
-The settings view still needs its Ableton check with the captured archive.
+The captured archive has identical setting bytes for all 25 keys, so it
+verified selection only. In a separate local test copy, Osc 1 Wave was 0 for
+C2 and 3 for D2. The user confirmed that the value changed in Ableton.
+The test copy was opened through the AFX browser.
