@@ -1,9 +1,9 @@
 # MicroTune editor page
 
 Added 19 October 2026, using the existing offline table model and file format.
-The **MicroTune** tab edits a local working table and can explicitly send one or
-two selected pitches to temporary hardware table 0. The FX + Perf MicroTune
-Table parameter selects the synth's active table separately.
+The **MicroTune** tab edits a local working table. It can explicitly send
+selected pitches or the full working table to temporary hardware table 0.
+The FX + Perf MicroTune Table parameter selects the active table separately.
 
 ## Use
 
@@ -69,6 +69,26 @@ the pitch near baseline, as confirmed by the user. The user then confirmed
 the two-note send in Ableton with key 69 at +25 cents and key 70 at −25 cents,
 followed by a successful Reset Notes and resend for both keys.
 
+### Send the full table to temporary table 0
+
+Set **File target** to **0**, click **Send Full Table to 0...**, then confirm
+the named working table and MIDI output. This replaces all 128 hardware
+pitches in table 0, regardless of the note selection. The processor takes a
+snapshot at confirmation and dispatches 64 two-note messages, with at least
+20 ms between dispatches. Closing the editor leaves the transfer running.
+
+An output change or DAW state restore stops the transfer. The status reports
+if table 0 may be partial. Reconnect and explicitly send the full table again
+to replace any partial result. The plugin reports dispatch and has no table
+readback. A complete standard-pitch table can be sent to restore equal
+temperament. The action addresses table 0 only and has no persistent save.
+
+The offline codec and native editor checks passed. The native check exercised
+Cancel and Send through the dialog, captured all 64 messages on a private
+virtual MIDI port, and verified pacing, editor closure and interruption
+without automatic resume. The physical check of the full-table plugin action
+is pending.
+
 ## Working state and DAW projects
 
 The processor owns the working document, so closing and reopening the editor
@@ -89,7 +109,7 @@ inside the Set does not change that hardware-recall limitation.
 
 Document edits notify the host that non-parameter state changed; they are not
 95 new automation lanes. The existing **95 parameters and indices** are unchanged.
-Only the explicit **Send Notes to Table 0** action dispatches tuning MIDI.
+Only the explicit selected-note and full-table send actions dispatch tuning MIDI.
 
 ## Bounds and presentation
 

@@ -254,7 +254,7 @@ bool BSIIControlAudioProcessor::serviceProjectRecall()
     return false;
 }
 
-juce::String BSIIControlAudioProcessor::storedConnectionKey() const
+juce::String BSIIControlAudioProcessor::availableMidiOutputIdentifier() const
 {
     if(!midiOutput) return {};
     const auto id=midiOutput->getIdentifier();
@@ -272,20 +272,20 @@ BSIIControlAudioProcessor::StoredWriteInfo BSIIControlAudioProcessor::getStoredW
 
 bool BSIIControlAudioProcessor::prepareStoredPatchWrite(int destination, const juce::File& backupRoot)
 {
-    if(storedWrite.busy()) return false;
+    if(storedWrite.busy() || isFullTuningTransferBusy()) return false;
     storedWriteError.clear();
     {
         const juce::ScopedLock lock(connectionLock);
         if(capturePending || recallPending || recallSettling || pendingHardwareChannel.load()>0)
         { storedWriteError="Finish capture, recall or channel setup before preparing a write."; return false; }
     }
-    if(!localBank || storedConnectionKey().isEmpty() || !connectHardwareSysExInput(midiOutput->getName()))
+    if(!localBank || availableMidiOutputIdentifier().isEmpty() || !connectHardwareSysExInput(midiOutput->getName()))
     { storedWriteError="Connect an unambiguous MIDI output and input, and open a bank first."; return false; }
     const auto base=backupRoot==juce::File{} ? juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory)
         .getChildFile("BSII Control/StoredPresetBackups") : backupRoot;
     const auto folder=base.getChildFile(juce::Time::getCurrentTime().formatted("%Y%m%d-%H%M%S")+"-"+juce::Uuid().toString());
     if(!folder.createDirectory()) { storedWriteError="Could not create a backup directory. Nothing sent."; return false; }
-    if(!storedWrite.begin(*localBank,localBankSelection,destination,storedConnectionKey(),juce::Time::getMillisecondCounterHiRes())) return false;
+    if(!storedWrite.begin(*localBank,localBankSelection,destination,availableMidiOutputIdentifier(),juce::Time::getMillisecondCounterHiRes())) return false;
     storedBackupFolder=folder;
     cancelStoredWriteRequested.store(false);
     return true;
@@ -293,7 +293,7 @@ bool BSIIControlAudioProcessor::prepareStoredPatchWrite(int destination, const j
 
 bool BSIIControlAudioProcessor::confirmStoredPatchWrite(uint64_t token)
 {
-    if(cancelStoredWriteRequested.load() || !storedWrite.ready() || token!=storedWrite.token()) return false;
+    if(isFullTuningTransferBusy() || cancelStoredWriteRequested.load() || !storedWrite.ready() || token!=storedWrite.token()) return false;
     {
         const juce::ScopedLock lock(connectionLock);
         if(capturePending || recallPending || recallSettling || pendingHardwareChannel.load()>0) return false;
@@ -329,7 +329,7 @@ bool BSIIControlAudioProcessor::serviceStoredPatchWrite()
         juce::MemoryBlock check;
         return file.loadFileAsData(check) && check==data;
     };
-    storedWrite.tick(juce::Time::getMillisecondCounterHiRes(),storedConnectionKey(),latest.data,latest.serial,
+    storedWrite.tick(juce::Time::getMillisecondCounterHiRes(),availableMidiOutputIdentifier(),latest.data,latest.serial,
         [&](const juce::MemoryBlock& data)
         {
             if(!midiOutput || data.isEmpty()) return false;
@@ -345,7 +345,7 @@ bool BSIIControlAudioProcessor::serviceStoredPatchWrite()
             object->setProperty("sourceFile",storedWrite.sourceName());
             object->setProperty("sourceEntry",storedWrite.sourceIndex());
             object->setProperty("destination",storedWrite.destination());
-            object->setProperty("deviceIdentifier",storedConnectionKey());
+            object->setProperty("deviceIdentifier",availableMidiOutputIdentifier());
             object->setProperty("beforeBankSha256",juce::SHA256(bank).toHexString());
             object->setProperty("originalSlotSha256",juce::SHA256(original).toHexString());
             object->setProperty("plannedWriteSha256",juce::SHA256(planned).toHexString());
@@ -363,6 +363,7 @@ bool BSIIControlAudioProcessor::serviceStoredPatchWrite()
 void BSIIControlAudioProcessor::timerCallback()
 {
     restoreHardwareConnection();
+    serviceFullTuningTransfer();
     if (serviceStoredPatchWrite()) return;
     if (serviceHardwareChannelChange()) return;
     if (serviceProjectRecall()) return;
@@ -740,6 +741,61 @@ juce::AudioProcessorEditor* BSIIControlAudioProcessor::createEditor()
     return new BSIIControlAudioProcessorEditor (*this);
 }
 
+bool BSIIControlAudioProcessor::startFullTuningTransfer (uint64_t confirmedRevision, const juce::String& confirmedOutput)
+{
+    if (isFullTuningTransferBusy()) return false;
+
+    cancelFullTuningRequested.store (false);
+    const auto tuning = getLocalTuningInfo();
+    const auto output = availableMidiOutputIdentifier();
+    if (isStoredPatchBusy())
+        fullTuningStatus = "Wait for the stored-preset operation to finish.";
+    else if (output.isEmpty() || output != confirmedOutput)
+        fullTuningStatus = "MIDI output changed or disconnected. Nothing sent.";
+    else if (tuning.revision != confirmedRevision || tuning.document.targetTable != 0)
+        fullTuningStatus = "Working table changed. Review it and confirm again.";
+    else if (auto packets = bsii::microtuning::encodeChanges (0, tuning.document.table.notes(), 2))
+    {
+        fullTuningPackets = std::move (*packets);
+        fullTuningPacketsSent = 0;
+        fullTuningOutput = output;
+        nextTuningPacketMs = 0;
+        fullTuningStatus = "Dispatching table 0: 0 / 64 messages.";
+        return true;
+    }
+    else
+        fullTuningStatus = "Invalid working table. Nothing sent.";
+    return false;
+}
+
+void BSIIControlAudioProcessor::serviceFullTuningTransfer()
+{
+    if (! isFullTuningTransferBusy()) return;
+
+    const bool stateChanged = cancelFullTuningRequested.exchange (false);
+    if (! stateChanged && juce::Time::getMillisecondCounterHiRes() < nextTuningPacketMs) return;
+    if (stateChanged || availableMidiOutputIdentifier() != fullTuningOutput)
+    {
+        fullTuningStatus = "Transfer stopped after " + juce::String (static_cast<int> (fullTuningPacketsSent))
+            + " messages. Table 0 may be partial.";
+        fullTuningPackets.clear();
+        return;
+    }
+
+    const auto& packet = fullTuningPackets[fullTuningPacketsSent];
+    midiOutput->sendMessageNow (juce::MidiMessage (packet.data(), static_cast<int> (packet.size()), 0.0));
+    // Pace from the actual dispatch. A late UI tick must never cause a burst.
+    nextTuningPacketMs = juce::Time::getMillisecondCounterHiRes() + 20.0;
+    if (++fullTuningPacketsSent == fullTuningPackets.size())
+    {
+        fullTuningPackets.clear();
+        fullTuningStatus = "128 pitches dispatched to table 0. Verify on the synth.";
+    }
+    else
+        fullTuningStatus = "Dispatching table 0: " + juce::String (static_cast<int> (fullTuningPacketsSent))
+            + " / 64 messages.";
+}
+
 BSIIControlAudioProcessor::LocalTuningInfo BSIIControlAudioProcessor::getLocalTuningInfo() const
 {
     const juce::ScopedLock lock (localTuningLock);
@@ -821,6 +877,7 @@ void BSIIControlAudioProcessor::getStateInformation (juce::MemoryBlock& destData
 void BSIIControlAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     cancelStoredWriteRequested.store(true);
+    cancelFullTuningRequested.store (true);
     auto xml = getXmlFromBinary (data, sizeInBytes);
     if (! xml) return;
     auto state = juce::ValueTree::fromXml (*xml);

@@ -206,7 +206,7 @@ MicroTunePage::MicroTunePage (BSIIControlAudioProcessor& p) : processor (p)
     addAndMakeVisible (viewport);
     for (auto* component : std::initializer_list<juce::Component*> { &heading, &hint, &nameLabel,
             &nameEditor, &targetLabel, &target, &status, &newButton, &loadButton, &saveButton, &table, &undoButton, &redoButton, &allButton,
-            &setButton, &addButton, &resetButton, &bulkCents, &selectionHint, &importButton, &sendButton, &sendStatus })
+            &setButton, &addButton, &resetButton, &bulkCents, &selectionHint, &importButton, &sendButton, &sendStatus, &sendTableButton, &fullSendStatus })
         content.addAndMakeVisible (component);
     heading.setText ("MicroTune - local table", juce::dontSendNotification);
     heading.setFont (juce::FontOptions (18.0f).withStyle ("Bold"));
@@ -237,6 +237,7 @@ MicroTunePage::MicroTunePage (BSIIControlAudioProcessor& p) : processor (p)
     addButton.onClick = [this] { bulkEdit (bsii::microtuning::BulkEdit::addCents); };
     resetButton.onClick = [this] { bulkEdit (bsii::microtuning::BulkEdit::reset); };
     sendButton.onClick = [this] { sendSelectedNotes(); };
+    sendTableButton.onClick = [this] { confirmFullTuningTransfer(); };
     sendButton.setTooltip ("Replace only the selected pitches in temporary hardware table 0.");
     sendStatus.setText ("Set File target to 0 and select one or two notes.", juce::dontSendNotification);
     bulkCents.setText ("0", false);
@@ -267,7 +268,7 @@ MicroTunePage::~MicroTunePage()
 void MicroTunePage::resized()
 {
     viewport.setBounds (getLocalBounds());
-    const auto height = juce::jmax (766, getHeight());
+    const auto height = juce::jmax (800, getHeight());
     const auto width = juce::jmax (1, getWidth() - (height > getHeight() ? viewport.getScrollBarThickness() : 0));
     content.setSize (width, height);
     auto area = content.getLocalBounds().reduced (12);
@@ -299,6 +300,11 @@ void MicroTunePage::resized()
     sendButton.setBounds (transfer.removeFromLeft (180));
     transfer.removeFromLeft (8);
     sendStatus.setBounds (transfer);
+    area.removeFromTop (6);
+    auto fullTransfer = area.removeFromTop (28);
+    sendTableButton.setBounds (fullTransfer.removeFromLeft (180));
+    fullTransfer.removeFromLeft (8);
+    fullSendStatus.setBounds (fullTransfer);
     area.removeFromTop (8);
     tuningView->setBounds (area.removeFromTop (264));
     area.removeFromTop (8);
@@ -306,7 +312,11 @@ void MicroTunePage::resized()
     table.setBounds (area);
 }
 
-void MicroTunePage::timerCallback() { refresh(); }
+void MicroTunePage::timerCallback()
+{
+    refresh();
+    updateSendButtons();
+}
 
 void MicroTunePage::refresh()
 {
@@ -315,7 +325,7 @@ void MicroTunePage::refresh()
     shown = latest;
     undoButton.setEnabled (shown.canUndo);
     redoButton.setEnabled (shown.canRedo);
-    updateSendButton();
+    updateSendButtons();
     displayedRevision = shown.revision;
     if (! nameEditor.hasKeyboardFocus (true)) nameEditor.setText (shown.document.name, false);
     target.setSelectedId (shown.document.targetTable + 1, juce::dontSendNotification);
@@ -385,13 +395,16 @@ void MicroTunePage::selectedRowsChanged (int)
     const auto count = table.getNumSelectedRows();
     selectionHint.setText (juce::String (count) + " selected - Shift/Command-click Key or Note to select.", juce::dontSendNotification);
     for (auto* button : { &setButton, &addButton, &resetButton }) button->setEnabled (count > 0);
-    updateSendButton();
+    updateSendButtons();
 }
 
-void MicroTunePage::updateSendButton()
+void MicroTunePage::updateSendButtons()
 {
     const auto count = table.getNumSelectedRows();
-    sendButton.setEnabled (shown.document.targetTable == 0 && count >= 1 && count <= 2);
+    const bool canSend = shown.document.targetTable == 0 && ! processor.isFullTuningTransferBusy();
+    sendButton.setEnabled (canSend && count >= 1 && count <= 2);
+    sendTableButton.setEnabled (canSend);
+    fullSendStatus.setText (processor.getFullTuningTransferStatus(), juce::dontSendNotification);
 }
 
 void MicroTunePage::sendSelectedNotes()
@@ -402,6 +415,8 @@ void MicroTunePage::sendSelectedNotes()
     juce::String result;
     if (document.targetTable != 0 || count < 1 || count > 2)
         result = "Set File target to 0 and select one or two notes.";
+    else if (processor.isFullTuningTransferBusy())
+        result = "Wait for the full-table transfer to finish.";
     else if (processor.isStoredPatchBusy())
         result = "Wait for the stored-preset operation to finish.";
     else if (auto& output = processor.hardwareMidiOutput(); output != nullptr)
@@ -428,6 +443,34 @@ void MicroTunePage::sendSelectedNotes()
         result = "Choose a MIDI output before sending.";
 
     sendStatus.setText (result, juce::dontSendNotification);
+}
+
+void MicroTunePage::confirmFullTuningTransfer()
+{
+    const auto tuning = processor.getLocalTuningInfo();
+    const auto& output = processor.hardwareMidiOutput();
+    if (! output)
+    {
+        processor.startFullTuningTransfer (tuning.revision, {});
+        updateSendButtons();
+        return;
+    }
+
+    const juce::Component::SafePointer<MicroTunePage> safe (this);
+    juce::AlertWindow::showOkCancelBox (juce::MessageBoxIconType::QuestionIcon,
+        "Replace temporary tuning table 0?",
+        "Send all 128 pitches in " + tuning.document.name + " to table 0 on " + output->getName()
+            + "? This replaces every pitch in temporary table 0.",
+        "Send Full Table", "Cancel", this,
+        juce::ModalCallbackFunction::create (
+            [safe, revision = tuning.revision, identifier = output->getIdentifier()] (int result)
+            {
+                if (safe && result == 1)
+                {
+                    safe->processor.startFullTuningTransfer (revision, identifier);
+                    safe->updateSendButtons();
+                }
+            }));
 }
 
 void MicroTunePage::bulkEdit (bsii::microtuning::BulkEdit operation)

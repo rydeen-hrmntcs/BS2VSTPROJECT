@@ -12,8 +12,9 @@ from the old chat. Verify the current checkout and validation status first.
 - [Remaining work and hardware acceptance](remaining-work.md) is the detailed
   checklist. Its dated validation sections are historical, not current evidence.
 - Current source includes local MicroTune editing, JSON persistence, bulk editing,
-  undo/redo, Scala SCL/KBM, numeric TUN and TUN v2 import. Tuning-table hardware
-  transfer/readback/persistent save are still pending.
+  undo/redo, Scala SCL/KBM, numeric TUN and TUN v2 import. Temporary table 0
+  supports explicit note and full-table sends. Table readback and persistent
+  save remain open.
 - [TUN v2 scope and limits](tun-v2-import.md): formulas and keyboard mapping are
   flattened to 128 pitches. Muted/unmapped keys require explicit preservation;
   the editor does not implement note muting. JSON remains supported.
@@ -125,8 +126,8 @@ from the old chat. Verify the current checkout and validation status first.
    validation passed. The user confirmed both octave buttons update keyboard
    labels and table selection in Ableton.
    Single-note and two-note transfers passed using direct MIDI probes.
-   MicroTune can explicitly send one or two selected pitches to temporary table 0.
-   See microtune-editor.md.
+   MicroTune can explicitly send one or two selected pitches or the full working
+   table to temporary table 0. See microtune-editor.md.
    Sequence slot 1 was authorized for replacement; all four
    Play selections worked. External MIDI recording failed to advance steps in
    this setup (Sync Off, IN routing); paused pending stronger evidence. The

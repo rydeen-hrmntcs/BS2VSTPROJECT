@@ -19,10 +19,12 @@ struct Capture : juce::MidiInputCallback
     std::atomic<int> messages { 0 };
     juce::CriticalSection lock;
     juce::MemoryBlock last;
+    std::vector<juce::MemoryBlock> packets;
     void handleIncomingMidiMessage (juce::MidiInput*, const juce::MidiMessage& message) override
     {
         const juce::ScopedLock guard (lock);
         last = juce::MemoryBlock (message.getRawData(), static_cast<size_t> (message.getRawDataSize()));
+        packets.push_back (last);
         ++messages;
     }
     bool received (const juce::MemoryBlock& data)
@@ -652,6 +654,65 @@ int main (int argc, char** argv)
                "explicit transfer preserves local document, parameters and preset");
         check (picture (*editor, report.getChildFile ("tuning-table-zero-send.png")),
                "temporary tuning transfer UI renders");
+    }
+    // Full transfer uses the same private virtual port, independent of editor lifetime.
+    {
+        const auto& port = processor.hardwareMidiOutput();
+        const auto identifier = port ? port->getIdentifier() : juce::String{};
+        const auto before = capture.messages.load();
+        const auto tuning = processor.getLocalTuningInfo();
+        const auto expected = bsii::microtuning::encodeChanges (0, tuning.document.table.notes(), 2);
+        check (! processor.startFullTuningTransfer (tuning.revision + 1, identifier)
+               && ! processor.startFullTuningTransfer (tuning.revision, "different port"),
+               "full table send rejects stale confirmation and a different output");
+        auto& lookAndFeel = juce::LookAndFeel::getDefaultLookAndFeel();
+        const bool nativeAlerts = lookAndFeel.isUsingNativeAlertWindows();
+        lookAndFeel.setUsingNativeAlertWindows (false);
+        const auto choose = [&] (const juce::String& button)
+        {
+            if (page == nullptr || ! click (*page, "Send Full Table to 0...")) return false;
+            auto* alert = juce::Component::getCurrentlyModalComponent();
+            return alert != nullptr && click (*alert, button);
+        };
+        check (choose ("Cancel") && capture.messages.load() == before && ! processor.isFullTuningTransferBusy(),
+               "cancelling the actual confirmation sends no tuning data");
+
+        const auto start = juce::Time::getMillisecondCounterHiRes();
+        check (choose ("Send Full Table") && processor.isFullTuningTransferBusy()
+               && ! processor.startFullTuningTransfer (tuning.revision, identifier),
+               "actual confirmation starts a single full transfer");
+        lookAndFeel.setUsingNativeAlertWindows (nativeAlerts);
+        editor.reset();
+        while (processor.isFullTuningTransferBusy() && juce::Time::getMillisecondCounterHiRes() - start < 4000.0)
+            pump (10);
+        const auto elapsed = juce::Time::getMillisecondCounterHiRes() - start;
+        pump();
+        check (! processor.isFullTuningTransferBusy() && elapsed >= 1260.0
+               && processor.getFullTuningTransferStatus().contains ("128 pitches dispatched"),
+               "full transfer completes without bursting and survives closing the editor");
+        {
+            const juce::ScopedLock guard (capture.lock);
+            bool matched = expected && expected->size() == 64 && capture.messages.load() == before + 64;
+            if (matched)
+                for (size_t i = 0; i < expected->size(); ++i)
+                {
+                    const auto& bytes = (*expected)[i];
+                    matched &= capture.packets[static_cast<size_t> (before) + i] == juce::MemoryBlock (bytes.data(), bytes.size());
+                }
+            check (matched, "exactly 64 ordered, encoded two-note packets address all of table 0");
+        }
+
+        check (processor.startFullTuningTransfer (tuning.revision, identifier), "another explicit send can start");
+        pump (80);
+        auto output = std::move (processor.hardwareMidiOutput());
+        pump (120);
+        const auto interrupted = capture.messages.load();
+        processor.hardwareMidiOutput() = std::move (output);
+        pump (100);
+        check (! processor.isFullTuningTransferBusy()
+               && processor.getFullTuningTransferStatus().contains ("may be partial")
+               && interrupted > before + 64 && interrupted < before + 128 && capture.messages.load() == interrupted,
+               "output loss stops a partial transfer with no automatic resume");
     }
     // Actual processor-owned stored transaction, using only a private virtual BSII.
     {

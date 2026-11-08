@@ -79,6 +79,11 @@ public:
     bool undoLocalTuning();
     bool redoLocalTuning();
 
+    // Explicit temporary transfer. Queue and port access are message-thread only.
+    bool startFullTuningTransfer (uint64_t confirmedRevision, const juce::String& confirmedOutput);
+    bool isFullTuningTransferBusy() const { return ! fullTuningPackets.empty(); }
+    juce::String getFullTuningTransferStatus() const { return fullTuningStatus; }
+
     // Message-thread-only browser workspace; survives editor closure, not Set state.
     std::shared_ptr<const bsii::PatchBank> getLocalBank() const { return localBank; }
     int getLocalBankSelection() const { return localBankSelection; }
@@ -180,7 +185,8 @@ private:
     void publishNRPN (int channel, int nrpnMSB, int nrpnLSB, int value);
 
     bool serviceStoredPatchWrite();
-    juce::String storedConnectionKey() const;
+    juce::String availableMidiOutputIdentifier() const;
+    void serviceFullTuningTransfer();
     bsii::StoredPatchWrite storedWrite;
     juce::File storedBackupFolder;
     juce::String storedWriteError;
@@ -197,6 +203,11 @@ private:
     std::vector<bsii::microtuning::Document> localTuningPast, localTuningFuture;
     juce::String localTuningSavedDocument = bsii::microtuning::serialise (bsii::microtuning::Document {}).value();
     bool travelLocalTuningHistory (bool undo);
+    bsii::microtuning::Messages fullTuningPackets;
+    size_t fullTuningPacketsSent = 0;
+    double nextTuningPacketMs = 0;
+    juce::String fullTuningOutput, fullTuningStatus { "Replaces all 128 pitches in temporary table 0." };
+    std::atomic<bool> cancelFullTuningRequested { false };
     std::unique_ptr<juce::MidiOutput> midiOutput;
     mutable juce::CriticalSection connectionLock;
     juce::String savedOutputIdentifier, savedOutputName;

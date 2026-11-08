@@ -109,7 +109,8 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   Ableton. A direct four-note transfer and restore also passed using two
   messages with a 20 ms wait between dispatches. A full direct transfer and
   restore at that spacing passed acoustic spot checks at packets 1, 32 and 64.
-  Full-table transfer from the plugin, table readback and persistent save
+  The plugin has an explicit full-table send with the same minimum 20 ms
+  spacing. Hosted full-table validation, table readback and persistent save
   remain open. Table selection is hardware-tested.
 - [ ] **Remaining tuning imports:** [Scala `.scl`/`.kbm` import](scala-import.md)
   now has local preview, explicit reference/mapping and unavailable-note handling,
