@@ -103,9 +103,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   between external MIDI-to-Arp and Arp-to-MIDI; no verified remote command.
 - [ ] **MicroTune hardware table workflow:** an [offline table editor and SysEx
   exporter](microtune-offline.md), plus a [local editor page](microtune-editor.md),
-  are implemented. A direct single-note send and restore passed acoustically in
-  table 0. Plugin transfer, batch validation, table readback and persistent save
-  remain open. Table selection is already implemented and hardware-tested.
+  are implemented. Direct single-note and two-note sends and restores passed
+  acoustically in table 0. Plugin transfer, larger batches, table readback and
+  persistent save remain open. Table selection is implemented and hardware-tested.
 - [ ] **Remaining tuning imports:** [Scala `.scl`/`.kbm` import](scala-import.md)
   now has local preview, explicit reference/mapping and unavailable-note handling,
   and one-step undo. [Numeric `.tun` import](tun-import.md), including the current

@@ -136,7 +136,22 @@ cents and A♯ at 0 cents. With table 0 confirmed again, the message
 A measured −25.4 cents and A♯ stayed at 0 cents. After sending the same
 standard-pitch message above, A measured +0.3 cents again.
 
-All test messages addressed note 69 in temporary table 0. The positive and
-negative single-note changes and restoration passed acoustically, with MIDI
-note 70 serving as the neighboring-note control for the negative test. Batch
-transfer, table readback, persistent save and plugin transfer remain open.
+The positive and negative single-note changes and restoration passed
+acoustically. MIDI note 70 served as the neighboring-note control for the
+negative test.
+
+### Two-note hardware check — 8 November 2026
+
+Edit-buffer readback confirmed table 0 before one SysEx message targeted MIDI
+note 69 at +25 cents and note 70 at −25 cents:
+
+`F0 7F 00 08 02 00 02 45 45 20 00 46 45 60 00 F7`
+
+Ableton Tuner measured A at +24.6 cents and A♯ at −25.3 cents. A second message
+restored both to standard pitch:
+
+`F0 7F 00 08 02 00 02 45 45 00 00 46 46 00 00 F7`
+
+The user confirmed both returned near baseline. Exact final readings were not
+recorded. The test messages addressed only temporary table 0. Larger batches,
+table readback, persistent save and plugin transfer remain open.
