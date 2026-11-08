@@ -1,4 +1,5 @@
 #include "BSIIAfxPage.h"
+#include "BSIIAfxFields.h"
 
 AfxPage::AfxPage(BSIIControlAudioProcessor& p):processor(p)
 {
@@ -18,13 +19,20 @@ AfxPage::AfxPage(BSIIControlAudioProcessor& p):processor(p)
         button.onClick=[this,i]{selectKey(i);};
     }
     open.onClick=[this]{chooseOpen();};save.onClick=[this]{chooseSave();};
+    content.addAndMakeVisible(settings);
+    settings.getHeader().addColumn("Section",1,145,100,240);
+    settings.getHeader().addColumn("Parameter",2,240,140,500);
+    settings.getHeader().addColumn("Stored control value",3,230,120,450);
+    settings.getHeader().setStretchToFitActive(true);
+    settings.setRowHeight(26);
+    settings.setColour(juce::ListBox::backgroundColourId,juce::Colour(0xff202326));
     refresh();
 }
-AfxPage::~AfxPage(){chooser.reset();viewport.setViewedComponent(nullptr,false);}
+AfxPage::~AfxPage(){chooser.reset();settings.setModel(nullptr);viewport.setViewedComponent(nullptr,false);}
 void AfxPage::resized()
 {
     viewport.setBounds(getLocalBounds());
-    const int height=juce::jmax(450,getHeight());
+    const int height=juce::jmax(720,getHeight());
     content.setSize(juce::jmax(1,getWidth()-(height>getHeight()?viewport.getScrollBarThickness():0)),height);
     auto area=content.getLocalBounds().reduced(12);
     heading.setBounds(area.removeFromTop(26));hint.setBounds(area.removeFromTop(38));
@@ -46,7 +54,8 @@ void AfxPage::resized()
         if(octave==1)keys[24].setBounds(juce::Rectangle<float>(keyboard.getX()+7*width,keyboard.getY(),width,62).toNearestInt());
         for(int pc=0;pc<12;++pc)if(pc==1||pc==3||pc==6||pc==8||pc==10)keys[static_cast<size_t>(octave*12+pc)].toFront(false);
     }
-    area.removeFromTop(8);detail.setBounds(area.removeFromTop(88));status.setBounds(area);
+    area.removeFromTop(8);detail.setBounds(area.removeFromTop(88));
+    status.setBounds(area.removeFromBottom(50));settings.setBounds(area);
 }
 void AfxPage::refresh()
 {
@@ -56,6 +65,7 @@ void AfxPage::refresh()
     source.setTooltip(archive?"SHA-256: "+juce::SHA256(archive->bytes()).toHexString():juce::String());
     coverage.setText(archive?"Data: 25/25 | Names: "+juce::String(archive->nameCount())+"/25. Bank identity, protection and saved state are not verified.":"Open raw active-buffer replies. Names are optional; all 25 data records are required.",juce::dontSendNotification);
     save.setEnabled(archive!=nullptr);
+    settings.updateContent();settings.repaint();
     for(int i=0;i<25;++i)
     {
         auto& button=keys[static_cast<size_t>(i)];
@@ -70,8 +80,26 @@ void AfxPage::refresh()
     const auto* key=archive?archive->key(selected):nullptr;
     detail.setText(key?"Selected: Key "+juce::String(selected+1)+" ("+juce::MidiMessage::getMidiNoteName(36+selected,true,true,4)+"), wire index "+juce::String(selected)
         +"\n"+key->displayName()+" | "+(key->present?"Overlay present":"Empty overlay (underlying patch)")
-        +"\nData preserved: 106 bytes. "+(key->name.isEmpty()?"No name reply in this archive.":"Name reply preserved: 26 bytes.")
+        +"\nValues below are decoded stored control units, not measured Hz/cents/time. Read-only."
         :"Select a key to inspect its record. Parameter editing and hardware transfer are not available yet.",juce::dontSendNotification);
+}
+int AfxPage::getNumRows()
+{
+    const auto archive=processor.getLocalAfxArchive();
+    const auto* key=archive?archive->key(processor.getLocalAfxSelection()):nullptr;
+    return key && key->present?static_cast<int>(std::size(bsii::afx::fields)):0;
+}
+void AfxPage::paintRowBackground(juce::Graphics& g,int row,int,int,bool selected)
+{g.fillAll(selected?juce::Colour(0xff24556a):row%2?juce::Colour(0xff272b2f):juce::Colour(0xff202326));}
+void AfxPage::paintCell(juce::Graphics& g,int row,int column,int width,int height,bool)
+{
+    if(!juce::isPositiveAndBelow(row,getNumRows()))return;
+    const auto archive=processor.getLocalAfxArchive();
+    const auto* key=archive?archive->key(processor.getLocalAfxSelection()):nullptr;
+    if(!key)return;
+    const auto& field=bsii::afx::fields[row];
+    const auto text=column==1?juce::String(field.group):column==2?juce::String(field.label):bsii::afx::display(key->decoded(),field);
+    g.setColour(juce::Colours::white);g.drawText(text,6,0,width-12,height,juce::Justification::centredLeft,true);
 }
 void AfxPage::selectKey(int index){processor.selectLocalAfxKey(index);refresh();}
 bool AfxPage::loadArchiveFile(const juce::File& file)

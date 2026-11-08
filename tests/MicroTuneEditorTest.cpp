@@ -575,6 +575,14 @@ int main (int argc, char** argv)
                 if(button){button->triggerClick();pump(5);check(processor.getLocalAfxSelection()==i,"each AFX key selects its exact wire index");}
             }
             check(key && processor.getLocalAfxSelection()==24,"last visible AFX key selects wire index24");
+            auto* values=findTable(*afx);
+            check(values && values->getNumRows()==0,"empty AFX key does not display inactive parameter bytes");
+            afx->selectKey(0);pump();
+            check(values && values->getNumRows()==85,"populated AFX key exposes85 read-only settings");
+            if(values){values->scrollToEnsureRowIsOnscreen(0);pump();}
+            for(auto* child:afx->getChildren())if(auto* viewport=dynamic_cast<juce::Viewport*>(child))viewport->setViewPosition(0,10000);
+            pump();check(picture(*editor,report.getChildFile("afx-settings.png")),"AFX populated settings table rendered");
+            afx->selectKey(24);pump();
             auto* description=findComponent<juce::Label>(*afx,[](auto& c){return c.getText().contains("wire index 24");});
             check(description && description->getText().contains("Name unavailable"),"selected record shows absent name explicitly");
             const auto copy=report.getChildFile("afx-exact-copy.syx");juce::MemoryBlock saved;

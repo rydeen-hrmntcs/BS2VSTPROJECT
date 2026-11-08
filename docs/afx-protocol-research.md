@@ -128,3 +128,14 @@ records and showing25 key slots, names/presence and provenance before enabling
 parameter editing. Distinguish missing names from empty names, and local document
 changes from device writes. Full8-bank backup still requires a reviewed selection
 and unsaved-buffer restoration plan.
+
+
+### Firmware clarification from Components — 27 October 2026
+
+The user supplied a Components Updates screenshot explicitly reporting Version
+4.15 installed. Its4.15 note says Components AFX overlay editor support was
+added;4.14.19 lists a fix for saving to slot104. Treat4.15 as the currently
+observed firmware. Prior4.14 references are historical user reports or the
+manual version consulted; do not silently relabel older captures as verified
+4.14 or4.15. The exact update timing was not established. This does not resolve
+the unanswered54/name request or prove a retail-version/Components commit mapping.

@@ -80,3 +80,32 @@ black-key and C4 selection also updated correctly. This accepts hosted local
 opening/selection/detail display, not hardware editing or saved-bank identity.
 Manual exact-copy saving and Set reopen were not newly checked; native coverage
 for copying/editor recreation is recorded above. No AFX hardware writes occurred.
+
+
+## Read-only selected-overlay settings — 27 October 2026
+
+The selected populated key now exposes85 source-defined settings in a Section /
+Parameter / Stored control value table. This uses the dedicated AFX decoded84-
+byte overlayIndex map, not the ordinary patch offsets. [Field map and source
+provenance](afx-field-map-research.md) document the exact85 fields and jX formats.
+Signed values are offset binary (raw-64 or raw-128); Boolean bits and masked
+choices are decoded separately even when sharing bytes. Numeric values are
+stored control units: the table does not claim Hz, cents, milliseconds or
+calibrated knob scales. Choice indices remain numeric where musical labels
+have not yet been independently established for this overlay view.
+
+Fixed-pitch raw128 means normal key pitch;129–255 show fixed MIDI note1–127.
+Output raw128–255 shows0–127. Below128 in either special field is displayed as
+Unspecified with the stored byte, rather than borrowing Components' initialized
+default or claiming a hardware fallback. Empty overlays show no active settings;
+their raw data remains preserved. Bytes81–83 and unknown bits are untouched.
+
+The decoder is a read-only projection. Selection, rendering and saving an exact
+copy never modify the archive, ordinary patch/APVTS or hardware. This increment
+still has no parameter editor, audition or hardware transfer. Physical field
+mapping/readback comparisons and engineering-unit calibration remain separate.
+Both focused tests and the native editor test passed. The AU and VST3 Release
+bundles were installed locally on 8 November 2026 after Live quit. Both passed
+strict signature and license checks, and Apple AU validation passed. Local
+evidence and previous bundles are under `validation-results/afx-settings/`.
+The settings view still needs its Ableton check with the captured archive.

@@ -15,6 +15,18 @@ public:
     {
         juce::MemoryBlock data, name;
         bool present=false;
+        std::array<juce::uint8,84> decoded() const
+        {
+            std::array<juce::uint8,84> values{};
+            if(data.getSize()!=106)return values;
+            const auto* packed=static_cast<const juce::uint8*>(data.getData())+9;
+            for(int block=0;block<12;++block)
+                for(int i=0;i<7;++i)
+                    values[static_cast<size_t>(block*7+i)]=static_cast<juce::uint8>(
+                        ((static_cast<unsigned>(packed[block*8+i])<<(i+1))&255u)
+                        | (packed[block*8+i+1]>>(6-i)));
+            return values;
+        }
         juce::String displayName() const
         {
             if(name.isEmpty()) return "Name unavailable";

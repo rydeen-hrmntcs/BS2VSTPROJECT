@@ -1,7 +1,7 @@
 #pragma once
 #include "PluginProcessor.h"
 
-class AfxPage : public juce::Component
+class AfxPage : public juce::Component, private juce::TableListBoxModel
 {
 public:
     explicit AfxPage(BSIIControlAudioProcessor&);
@@ -12,12 +12,16 @@ public:
     void selectKey(int);
 private:
     void refresh();
+    int getNumRows() override;
+    void paintRowBackground(juce::Graphics&,int,int,int,bool) override;
+    void paintCell(juce::Graphics&,int,int,int,int,bool) override;
     void chooseOpen();
     void chooseSave();
     BSIIControlAudioProcessor& processor;
     juce::Viewport viewport;
     juce::Component content;
     juce::Label heading,hint,source,coverage,detail,status;
+    juce::TableListBox settings {"AFX selected settings",this};
     juce::TextButton open{"Open AFX archive..."},save{"Save exact copy..."};
     std::array<juce::TextButton,25> keys;
     std::unique_ptr<juce::FileChooser> chooser;

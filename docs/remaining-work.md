@@ -140,8 +140,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   now preserves25 active data records, repeated byte-identically with o0 reported.
   Name reads timed out; buffer provenance, full8-bank capture and restoration
   remain unverified. No mutations sent. The [local archive browser](afx-local-browser.md)
-  now opens strict25-record captures, selects keys and saves byte-identical copies;
-  plugin parameter editing and hardware transfer are later increments.
+  opens strict 25-record captures, selects keys and saves byte-identical copies.
+  The installed read-only view shows 85 decoded settings per populated key.
+  Its Ableton check, parameter editing and hardware transfer remain open.
   Remaining scope: overlay-bank selection, protection,
   per-note data editing, transfer and explicit save/clear operations. The manual
   documents dedicated messages; their presence does not verify our hardware

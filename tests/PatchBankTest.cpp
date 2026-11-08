@@ -1,5 +1,6 @@
 #include "BSIIPatchBank.h"
 #include "BSIIAfxArchive.h"
+#include "BSIIAfxFields.h"
 #include "BSIIStoredPatchWrite.h"
 #include <iostream>
 #include <cstring>
@@ -72,6 +73,42 @@ int main(int argc,char** argv)
         bad=raw;static_cast<juce::uint8*>(bad.getData())[20]=128;rejects(bad);
         bad=raw;static_cast<juce::uint8*>(bad.getData())[7]=0x4c;rejects(bad);
         const juce::uint8 extra=0;bad=raw;bad.append(&extra,1);rejects(bad);
+    }
+    // Independent bitstream packing and known byte/bit coordinate vectors.
+    {
+        const auto pack=[](const std::array<juce::uint8,84>& decoded)
+        {
+            bsii::AfxArchive::Key key;
+            juce::uint8 wire[106]{0xf0,0,0x20,0x29,0,0x33,0,0x4e,0};wire[105]=0xf7;
+            for(int bit=0;bit<84*8;++bit)
+                if((decoded[static_cast<size_t>(bit/8)]>>(7-bit%8))&1)
+                    wire[9+bit/7]|=static_cast<juce::uint8>(1u<<(6-bit%7));
+            key.data=juce::MemoryBlock(wire,sizeof(wire));return key;
+        };
+        std::array<juce::uint8,84> bytes{};
+        for(int i=0;i<84;++i)bytes[static_cast<size_t>(i)]=static_cast<juce::uint8>((i*53+129)%256);
+        check(pack(bytes).decoded()==bytes,"AFX unpack matches independent bitstream across byte boundaries");
+        check(std::size(bsii::afx::fields)==85,"AFX source registry has85 fields");
+        const auto field=[](const char* id)->const bsii::afx::Field&
+        {for(const auto& f:bsii::afx::fields)if(juce::String(f.id)==id)return f;return bsii::afx::fields[0];};
+        bytes.fill(0);bytes[28]=15;bytes[46]=2;bytes[52]=1;
+        check(bsii::afx::value(bytes,field("filterShape"))==3 && bsii::afx::value(bytes,field("filterCircuit"))==1
+              && bsii::afx::value(bytes,field("filterSlope"))==1,"AFX shared filter byte masks isolated");
+        check(bsii::afx::value(bytes,field("lfo1SpeedMode"))==0 && bsii::afx::value(bytes,field("lfo1KeySync"))==1
+              && bsii::afx::value(bytes,field("lfo2SpeedMode"))==1 && bsii::afx::value(bytes,field("lfo2KeySync"))==0,"AFX LFO mode/key-sync bits isolated");
+        bytes[25]=231;bytes[5]=0;bytes[6]=255;bytes[29]=64;
+        check(bsii::afx::value(bytes,field("filterFrequency"))==231 && bsii::afx::value(bytes,field("osc1TuneCoarse"))==-128
+              && bsii::afx::value(bytes,field("osc1TuneFine"))==127 && bsii::afx::value(bytes,field("envAmpVelocity"))==0,"AFX unsigned8 and offset-binary signed values retain full range");
+        for(int raw=0;raw<256;++raw)
+        {
+            bytes[75]=bytes[76]=static_cast<juce::uint8>(raw);
+            const auto pitch=bsii::afx::value(bytes,field("pitch")),output=bsii::afx::value(bytes,field("outputLevel"));
+            check(raw<128?(!pitch && !output):(pitch==raw-128 && output==raw-128),"AFX special marker domains decoded without inventing defaults");
+        }
+        bytes[75]=128;check(bsii::afx::display(bytes,field("pitch"))=="Normal key pitch","AFX raw128 uses normal pitch rather than fixed MIDI0");
+        bytes[75]=197;check(bsii::afx::display(bytes,field("pitch"))=="MIDI note 69","AFX raw197 names fixed MIDI69 explicitly");
+        bytes[81]=91;bytes[82]=247;bytes[83]=13;
+        check(pack(bytes).decoded()==bytes,"AFX unmapped tail bytes remain unchanged");
     }
     // Exercise transactions against an independent synthetic hardware bank.
     {

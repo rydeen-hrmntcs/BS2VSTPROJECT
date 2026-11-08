@@ -160,6 +160,13 @@ AFX after the other synth areas; GUI redesign after features settle. Wider host,
 multiple-device, Intel/older macOS coverage and Developer ID/notarization remain
 separate work. See the detailed checklist for evidence and unresolved questions.
 
+## Current hardware firmware
+
+Components Updates screenshot supplied27 October explicitly shows **4.15 installed**.
+Its release note adds Components AFX overlay editor support. Earlier4.14 labels
+remain historical reports/manual references, not freshly verified firmware for
+all captures; update timing is unknown. AFX name-request timeout remains unresolved.
+
 ## AFX work in progress — 27 October 2026
 
 See [AFX protocol and first capture](afx-protocol-research.md). Read-only active
@@ -175,7 +182,11 @@ signatures/notices and AU validation passed after confirmed Live exit. Manual
 Ableton open/selection passed: D2 details matched and black keys/C4 followed.
 Manual copy saving remains separate. Capture file is
 Downloads/BSII-AFX-active-buffer-2026-10-27.syx.
-No hardware-send/edit controls are added. Reviewed backup/restore remains required before hardware editing.
+The 85-field read-only settings view passed focused and native editor checks.
+The AU and VST3 were installed on 8 November after Live quit. Apple AU validation
+passed. The next Ableton check is that the settings follow the selected key.
+See [the AFX browser notes](afx-local-browser.md). Review backup and restoration
+before adding hardware editing.
 
 ## Later v2 direction
 
