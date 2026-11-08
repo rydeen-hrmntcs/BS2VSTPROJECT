@@ -106,8 +106,9 @@ Evidence: [recall](project-sound-recall.md), [global controls](global-control-re
   are implemented. Direct single-note and two-note sends and restores passed
   acoustically in table 0. The plugin can explicitly send one or two selected
   pitches to table 0. Both one-note and two-note sends and restores passed in
-  Ableton. Larger batches, table readback and persistent save remain open.
-  Table selection is hardware-tested.
+  Ableton. A direct four-note transfer and restore also passed using two
+  messages with a 20 ms wait between dispatches. Longer transfers, table
+  readback and persistent save remain open. Table selection is hardware-tested.
 - [ ] **Remaining tuning imports:** [Scala `.scl`/`.kbm` import](scala-import.md)
   now has local preview, explicit reference/mapping and unavailable-note handling,
   and one-step undo. [Numeric `.tun` import](tun-import.md), including the current

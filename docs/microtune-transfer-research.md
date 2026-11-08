@@ -155,3 +155,16 @@ restored both to standard pitch:
 The user confirmed both returned near baseline. Exact final readings were not
 recorded. The test messages addressed only temporary table 0. Larger batches,
 table readback, persistent save and plugin transfer remain open.
+
+### Paced four-note hardware check — 8 November 2026
+
+Edit-buffer readback confirmed table 0. Two CoreMIDI messages, each with two
+entries, were sent with a 20 ms wait between dispatches. The first addressed
+MIDI keys 69–70 at +25 and −25 cents. The second addressed keys 71–72 at +25
+and −25 cents. With the same iD14 and Ableton Tuner setup, the four readings
+were +24.6, −25.3, +24.8 and −25.3 cents in key order.
+
+Two messages with the same spacing restored the four keys to standard pitch.
+The user measured +0.3, 0, +0.3 and +0.4 cents, matching all four baselines.
+This verifies a two-message sequence at that spacing on this setup. Longer
+sequences and full-table transfer still need hardware validation.
